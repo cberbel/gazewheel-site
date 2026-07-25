@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Teclado Redondo — uma voz para quem não consegue falar</title>
+<title>GazeWheel — Teclado Redondo, uma voz para quem não consegue falar</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%2326324c' stroke-width='9'/%3E%3Ccircle cx='50' cy='50' r='31' fill='none' stroke='%232c3a5c' stroke-width='9'/%3E%3Ccircle cx='50' cy='50' r='12' fill='%234da3ff'/%3E%3Cpath d='M56 48 v30 l8-7 4.8 10.6 6.2-2.8 -4.8-10.6 11-1 z' fill='%23fff' stroke='%230f1420' stroke-width='3'/%3E%3C/svg%3E">
 <meta name="description" content="Comunicação alternativa gratuita para quem não consegue falar e escreve sem usar os dedos. Teclado circular com previsão de palavras em português, voz, frases prontas e correção no meio do texto. Funciona com rastreador ocular, mouse adaptado ou toque.">
 <style>
   :root{--bg:#0f1420;--panel:#1a2233;--panel2:#232e46;--text:#f2f6ff;--dim:#8fa0bf;--accent:#4da3ff;--green:#59c96b;--amber:#ffd166;}
@@ -11,7 +12,10 @@
   body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,Arial,sans-serif;line-height:1.55;}
   .wrap{max-width:880px;margin:0 auto;padding:44px 22px 70px;}
   header{text-align:center;margin-bottom:38px;}
-  .mark{width:112px;height:112px;margin:0 auto 20px;display:block;}
+  .mark{width:112px;height:112px;margin:0 auto 14px;display:block;}
+  .brand{font-size:26px;font-weight:800;letter-spacing:.5px;margin-bottom:2px;}
+  .brand .gaze{color:var(--accent);}
+  .slogan{color:var(--amber);font-size:17px;font-style:italic;letter-spacing:.3px;margin-bottom:22px;}
   h1{font-size:38px;letter-spacing:-.6px;margin-bottom:14px;line-height:1.18;}
   .sub{color:var(--dim);font-size:20px;max-width:640px;margin:0 auto;}
   .cards{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:34px 0 44px;}
@@ -31,6 +35,14 @@
   .lede{font-size:20px;color:#dbe6f8;border-left:4px solid var(--amber);padding-left:18px;margin-bottom:22px;}
   .note{background:var(--panel);border-left:4px solid var(--accent);border-radius:0 12px 12px 0;padding:16px 20px;color:#cddaf0;font-size:16.5px;}
   footer{border-top:1px solid #2a3550;padding-top:22px;color:var(--dim);font-size:15px;text-align:center;}
+  .fs-link{display:inline-flex;align-items:center;gap:10px;margin-top:16px;text-decoration:none;color:var(--dim);}
+  .fs-link:hover{color:var(--text);}
+  .fs-mark{display:inline-flex;flex-direction:column;align-items:center;gap:2px;}
+  .fs-mark i{display:block;width:9px;height:9px;}
+  .fs-mark i:nth-child(1){background:#FF0000;}
+  .fs-mark i:nth-child(2){background:#FFED00;}
+  .fs-mark i:nth-child(3){background:#003BE3;}
+  .fs-name{font-weight:700;letter-spacing:.4px;font-size:15px;}
   code{background:var(--panel2);padding:2px 7px;border-radius:6px;font-size:15px;}
 </style>
 </head>
@@ -48,7 +60,10 @@
       <circle cx="50" cy="95.5" r="5" fill="#59c96b"/>
       <circle cx="10" cy="73" r="5" fill="#59c96b"/>
       <circle cx="10" cy="27" r="5" fill="#59c96b"/>
+      <path d="M56 48 v30 l8 -7 4.8 10.6 6.2 -2.8 -4.8 -10.6 11 -1 z" fill="#fff" stroke="#0f1420" stroke-width="2.6" stroke-linejoin="round"/>
     </svg>
+    <div class="brand"><span class="gaze">Gaze</span>Wheel</div>
+    <p class="slogan">Gazetyping is easier.</p>
     <h1>Para quem não consegue falar<br>e escreve sem os dedos</h1>
     <p class="sub">Uma voz montada com o movimento que sobrou — o olhar, um dedo, a cabeça, um trackball.
     Em português, de graça, sem instalar nada.</p>
@@ -121,6 +136,11 @@
 
   <footer>
     Projeto aberto de comunicação alternativa. Feito para ser copiado, adaptado e melhorado.
+    <br>
+    <a class="fs-link" href="https://www.freeschool.com.br" rel="noopener">
+      <span class="fs-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span>um projeto <span class="fs-name">free school</span></span>
+    </a>
   </footer>
 
 </div>
