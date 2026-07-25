@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GazeWheel — Teclado Redondo, uma voz para quem não consegue falar</title>
+<title>GazeWheel — a round keyboard for cursor typing</title>
+<meta name="description" content="GazeWheel is a free round on-screen keyboard for people who cannot speak and type with the cursor instead of their hands — eye tracker, trackball, head mouse or one finger. Word prediction in Portuguese, built-in voice, learning, no install.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%2326324c' stroke-width='9'/%3E%3Ccircle cx='50' cy='50' r='31' fill='none' stroke='%232c3a5c' stroke-width='9'/%3E%3Ccircle cx='50' cy='50' r='12' fill='%234da3ff'/%3E%3Cpath d='M56 48 v30 l8-7 4.8 10.6 6.2-2.8 -4.8-10.6 11-1 z' fill='%23fff' stroke='%230f1420' stroke-width='3'/%3E%3C/svg%3E">
-<meta name="description" content="Comunicação alternativa gratuita para quem não consegue falar e escreve sem usar os dedos. Teclado circular com previsão de palavras em português, voz, frases prontas e correção no meio do texto. Funciona com rastreador ocular, mouse adaptado ou toque.">
 <style>
   :root{--bg:#0f1420;--panel:#1a2233;--panel2:#232e46;--text:#f2f6ff;--dim:#8fa0bf;--accent:#4da3ff;--green:#59c96b;--amber:#ffd166;}
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -32,17 +32,22 @@
   section{margin-bottom:36px;}
   h3{font-size:22px;margin-bottom:10px;}
   p{margin-bottom:13px;font-size:17.5px;}
-  .lede{font-size:20px;color:#dbe6f8;border-left:4px solid var(--amber);padding-left:18px;margin-bottom:22px;}
+  ul.feat{list-style:none;margin:0 0 13px;}
+  ul.feat li{position:relative;padding-left:26px;margin-bottom:10px;font-size:17.5px;}
+  ul.feat li::before{content:"";position:absolute;left:0;top:9px;width:10px;height:10px;border-radius:50%;background:var(--accent);}
   .note{background:var(--panel);border-left:4px solid var(--accent);border-radius:0 12px 12px 0;padding:16px 20px;color:#cddaf0;font-size:16.5px;}
+  .shot{display:block;width:100%;max-width:640px;margin:18px auto 6px;border-radius:14px;border:1px solid #2a3550;}
+  .caption{text-align:center;color:var(--dim);font-size:15px;margin-bottom:0;}
   footer{border-top:1px solid #2a3550;padding-top:22px;color:var(--dim);font-size:15px;text-align:center;}
-  .fs-link{display:inline-flex;align-items:center;gap:10px;margin-top:16px;text-decoration:none;color:var(--dim);}
-  .fs-link:hover{color:var(--text);}
-  .fs-mark{display:inline-flex;flex-direction:column;align-items:center;gap:2px;}
-  .fs-mark i{display:block;width:9px;height:9px;}
-  .fs-mark i:nth-child(1){background:#FF0000;}
-  .fs-mark i:nth-child(2){background:#FFED00;}
-  .fs-mark i:nth-child(3){background:#003BE3;}
-  .fs-name{font-weight:700;letter-spacing:.4px;font-size:15px;}
+  .fs-link{display:inline-flex;align-items:center;gap:12px;margin-top:18px;text-decoration:none;color:inherit;}
+  .fs-stack{display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .fs-stack i{display:block;border-radius:2px;}
+  .fs-stack i:nth-child(1){width:8px;height:8px;background:#FF0000;}
+  .fs-stack i:nth-child(2){width:15px;height:15px;background:#FFED00;}
+  .fs-stack i:nth-child(3){width:24px;height:24px;background:#003BE3;}
+  .fs-word{display:flex;flex-direction:column;line-height:.92;text-align:left;color:var(--text);}
+  .fs-word b{font-weight:800;font-size:19px;letter-spacing:-.02em;}
+  .fs-word i{font-style:normal;font-weight:400;font-size:18px;letter-spacing:.01em;}
   code{background:var(--panel2);padding:2px 7px;border-radius:6px;font-size:15px;}
 </style>
 </head>
@@ -64,82 +69,87 @@
     </svg>
     <div class="brand"><span class="gaze">Gaze</span>Wheel</div>
     <p class="slogan">Gazetyping is easier.</p>
-    <h1>Para quem não consegue falar<br>e escreve sem os dedos</h1>
-    <p class="sub">Uma voz montada com o movimento que sobrou — o olhar, um dedo, a cabeça, um trackball.
-    Em português, de graça, sem instalar nada.</p>
+    <h1>A round keyboard for people<br>who type with the cursor</h1>
+    <p class="sub">For those who cannot speak and cannot use their hands. Type with your eyes, a finger,
+    your head or a trackball. Free, runs in the browser, nothing to install.</p>
   </header>
 
   <div class="cards">
     <a class="card fixa" href="estavel.html">
-      <span class="tag">versão fixa</span>
-      <h2>Usar agora</h2>
-      <p>A versão estável, que não muda. É esta que se usa no dia a dia, sem surpresas.</p>
-      <span class="go">Abrir →</span>
+      <span class="tag">stable</span>
+      <h2>Use it now</h2>
+      <p>The stable version. This is the one for daily use.</p>
+      <span class="go">Open →</span>
     </a>
     <a class="card teste" href="teste.html">
-      <span class="tag">em teste</span>
-      <h2>Experimentar o novo</h2>
-      <p>Fala automática ao fechar a frase, chamador de atenção, modo conversa, correção no meio do
-      texto e aprendizado a partir dos seus próprios escritos.</p>
-      <span class="go">Experimentar →</span>
+      <span class="tag">testing</span>
+      <h2>Try the new version</h2>
+      <p>Auto-speak on sentence end, attention chime, conversation mode, mid-text correction,
+      learning from your own texts.</p>
+      <span class="go">Try it →</span>
     </a>
   </div>
 
   <section>
-    <p class="lede">Isto não é um teclado. É uma voz.</p>
-    <p>Quem não fala mas alcança um teclado já tem como se virar. Quem fala mas não digita pode ditar.
-    O problema existe na interseção: <b>não sair som e não alcançar as teclas</b>. Aí a pessoa fica sem
-    saída — e não é só para pedir água. É para discordar, explicar, negociar, contar uma piada,
-    escrever um texto inteiro, defender um ponto de vista. Ideia complexa também precisa sair.</p>
-    <p>Por isso o projeto não trata a comunicação como uma lista de necessidades básicas. A prioridade é
-    escrever rápido o suficiente para sustentar uma conversa de verdade: previsão que aprende o seu jeito
-    de escrever, frase que já sai falada assim que você fecha o ponto, e a possibilidade de voltar ao
-    meio do texto para corrigir uma palavra sem apagar tudo o que veio depois.</p>
+    <h3>Why round?</h3>
+    <p>The common on-screen keyboard is a copy of the physical keyboard — a layout created for typing
+    with 8–10 fingers. With a cursor you have one pointer, and speed is decided by how far it has to
+    travel between keys. A circle is the natural shape for that: every key sits close to the center,
+    so the average distance per selection is as short as it gets.</p>
+    <p>The full alphabet stays on the outer ring, always in the same position. The inner ring shows only
+    the letters likely to come next, large and near the center. The center is a rest zone — a dead area
+    where the cursor can park without triggering anything.</p>
   </section>
 
   <section>
-    <h3>Como funciona</h3>
-    <p>O alfabeto inteiro fica sempre no anel de fora, sempre no mesmo lugar — dá para achar qualquer
-    letra sem procurar. No anel de dentro aparecem só as letras que provavelmente vêm agora, grandes e
-    perto do centro. Acima da roda ficam as palavras sugeridas: aceitar uma delas costuma custar uma
-    seleção só, no lugar de cinco ou seis.</p>
-    <p>O centro da roda é uma <b>zona de descanso</b>: uma área que não faz nada, onde o cursor pode
-    parar sem acionar botão nenhum. Depois de cada seleção há uma pequena pausa automática, para um
-    cursor parado no mesmo lugar não disparar duas vezes.</p>
+    <h3>What it does</h3>
+    <ul class="feat">
+      <li><b>Word prediction that learns.</b> Suggestions adapt to your vocabulary and your word chains.
+      Accepting a word usually costs one selection instead of five or six. You can also feed it your own
+      texts and export a backup.</li>
+      <li><b>It speaks for you.</b> End a sentence with a period and it is spoken out loud automatically.
+      An attention chime says "wait, I'm typing" so the other person doesn't walk away.</li>
+      <li><b>Conversation mode.</b> Your text goes full-screen, large, facing the person you are talking to.</li>
+      <li><b>A real cursor.</b> Move word by word through what you wrote and fix a word in the middle
+      without erasing everything after it. Long texts stay editable.</li>
+      <li><b>Saved phrases</b> for the things you say every day.</li>
+      <li><b>Rest zone and auto-pause.</b> After each selection there is a short pause, so a parked cursor
+      never fires twice.</li>
+    </ul>
   </section>
 
   <section>
-    <h3>Para quem é</h3>
-    <p>Pessoas com ELA, paralisia cerebral, lesão medular alta, AVC de tronco, esclerose múltipla
-    avançada ou distrofia muscular — qualquer situação em que a fala se foi e as mãos não alcançam o
-    teclado.</p>
-    <p>E também para quem está temporariamente sem voz: pessoas intubadas ou traqueostomizadas em UTI,
-    que passam dias ou semanas sem conseguir falar, quase sempre conseguem mover um dedo numa tela.
-    Hoje se comunicam apontando letras num cartão de papel. Isto roda em qualquer tablet que o hospital
-    já tenha.</p>
+    <h3>It adapts to your setup</h3>
+    <p>Everything the app needs from your equipment is cursor movement. If your device only moves the
+    pointer, turn on dwell selection and set the dwell time. If it already clicks by itself (like Tobii
+    Windows Control), keep dwell off so there are no two timers stacked. Wheel size, text size, letter
+    order, contrast, voice and speed are all adjustable:</p>
+    <img class="shot" src="assets/settings.png" alt="GazeWheel settings screen: dwell selection, dwell time, wheel size, text size, letter order, contrast, auto-speak, voice and speed" width="1000" height="1100">
+    <p class="caption">The settings screen (interface currently in Portuguese).</p>
   </section>
 
   <section>
-    <h3>Privacidade</h3>
-    <p class="note">O que você escreve não sai do seu computador. O vocabulário aprendido, as frases
-    salvas e os ajustes ficam guardados no próprio navegador, e você pode exportar tudo num arquivo de
-    backup a qualquer momento. Nenhum texto é enviado para nenhum servidor.</p>
+    <h3>Who it is for</h3>
+    <p>People with ALS, cerebral palsy, high spinal cord injury, brainstem stroke, advanced multiple
+    sclerosis or muscular dystrophy — any situation where speech is gone and hands don't reach the keys.</p>
+    <p>Also for people temporarily without a voice: intubated or tracheostomized ICU patients can
+    usually move one finger on a screen. This runs on any tablet the hospital already has.</p>
+    <p>Word prediction is currently in Portuguese.</p>
   </section>
 
   <section>
-    <h3>Se você usa rastreador ocular</h3>
-    <p>Se o seu equipamento já faz o clique sozinho por permanência (como o Tobii Windows Control),
-    mantenha a opção <code>selecionar parando o cursor</code> desligada nos ajustes — assim não há dois
-    tempos de espera somados. Se o equipamento só move o cursor e não clica, ligue a opção e ajuste o
-    tempo até ficar confortável.</p>
+    <h3>Privacy</h3>
+    <p class="note">Nothing you write leaves your computer. Learned vocabulary, saved phrases and settings
+    are stored in your own browser, and you can export a backup file at any time. No text is sent to any
+    server.</p>
   </section>
 
   <footer>
-    Projeto aberto de comunicação alternativa. Feito para ser copiado, adaptado e melhorado.
+    Open project. Made to be copied, adapted and improved.
     <br>
-    <a class="fs-link" href="https://www.freeschool.com.br" rel="noopener">
-      <span class="fs-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-      <span>um projeto <span class="fs-name">free school</span></span>
+    <a class="fs-link" href="https://www.freeschool.com.br" rel="noopener" aria-label="Free School">
+      <span class="fs-stack" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="fs-word"><b>free</b><i>school</i></span>
     </a>
   </footer>
 
