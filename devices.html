@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GazeWheel — devices &amp; suppliers for cursor typing</title>
+<meta name="description" content="Eye trackers, head mice and free software that move the cursor for you — the equipment side of typing with GazeWheel: Tobii Dynavox, Irisbond, EyeTech, built-in OS eye tracking and free webcam options.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%2326324c' stroke-width='9'/%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%234da3ff' stroke-width='9' stroke-dasharray='66 223' stroke-dashoffset='-140' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='50' r='29' fill='none' stroke='%232c3a5c' stroke-width='8'/%3E%3Ccircle cx='50' cy='50' r='12' fill='%234da3ff'/%3E%3Cpath d='M56 48 v30 l8-7 4.8 10.6 6.2-2.8 -4.8-10.6 11-1 z' fill='%23fff' stroke='%230f1420' stroke-width='3'/%3E%3C/svg%3E">
+<style>
+  :root{--bg:#0f1420;--panel:#1a2233;--panel2:#232e46;--text:#f2f6ff;--dim:#8fa0bf;--accent:#4da3ff;--green:#59c96b;--amber:#ffd166;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,Arial,sans-serif;line-height:1.55;}
+  .wrap{max-width:880px;margin:0 auto;padding:44px 22px 70px;}
+  .back{display:inline-block;color:var(--accent);text-decoration:none;font-weight:700;margin-bottom:26px;font-size:17px;}
+  h1{font-size:34px;letter-spacing:-.5px;margin-bottom:12px;line-height:1.2;}
+  .lede{color:var(--dim);font-size:19px;max-width:680px;margin-bottom:34px;}
+  h2{font-size:23px;margin:34px 0 6px;}
+  .tier{color:var(--dim);font-size:16px;margin-bottom:14px;}
+  .item{background:var(--panel);border:1px solid #2a3550;border-radius:14px;padding:18px 20px;margin-bottom:12px;}
+  .item h3{font-size:18.5px;margin-bottom:4px;}
+  .item h3 a{color:var(--accent);text-decoration:none;}
+  .item h3 a:hover{text-decoration:underline;}
+  .item p{color:#cddaf0;font-size:16.5px;margin:0;}
+  .badge{display:inline-block;font-size:12.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:3px 9px;border-radius:999px;margin-left:8px;vertical-align:2px;}
+  .badge.free{background:rgba(89,201,107,.16);color:var(--green);}
+  .badge.builtin{background:rgba(77,163,255,.16);color:var(--accent);}
+  .note{background:var(--panel);border-left:4px solid var(--amber);border-radius:0 12px 12px 0;padding:16px 20px;color:#cddaf0;font-size:16px;margin-top:34px;}
+  footer{border-top:1px solid #2a3550;margin-top:40px;padding-top:22px;color:var(--dim);font-size:15px;text-align:center;}
+  footer a{color:var(--accent);text-decoration:none;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="index.html">← GazeWheel</a>
+  <h1>Devices that move the cursor for you</h1>
+  <p class="lede">GazeWheel only needs one thing from your equipment: cursor movement. This is the
+  equipment side — from built-in, zero-cost options to dedicated assistive eye trackers. Start with
+  what you already have; upgrade when you hit its limits.</p>
+
+  <h2>Already in your device <span class="badge builtin">built in</span></h2>
+  <p class="tier">Try these first. They cost nothing and need no extra hardware.</p>
+  <div class="item">
+    <h3>Apple iPad / iPhone — Eye Tracking</h3>
+    <p>Built into iPadOS and iOS accessibility settings since 2024: the front camera tracks your eyes
+    and a dwell click selects. Works with GazeWheel in Safari on the same screen.</p>
+  </div>
+  <div class="item">
+    <h3>Windows — Eye Control</h3>
+    <p>Built into Windows 10/11 (Settings → Accessibility). Needs a supported eye tracker connected,
+    then moves the cursor and clicks by dwell system-wide.</p>
+  </div>
+  <div class="item">
+    <h3>A trackball, joystick or any adapted mouse</h3>
+    <p>If any body part can move a large trackball or a joystick, that is already enough. No special
+    software needed.</p>
+  </div>
+
+  <h2>Free software using a webcam <span class="badge free">free</span></h2>
+  <p class="tier">Head or eye tracking with the camera you already own. Less precise than dedicated
+  hardware, good for testing whether cursor typing works for you.</p>
+  <div class="item">
+    <h3><a href="https://cameramouse.org" rel="noopener">Camera Mouse</a> / <a href="https://eviacam.crea-si.com" rel="noopener">Enable Viacam</a></h3>
+    <p>Free head tracking: the webcam follows your head movement and moves the cursor. Windows.</p>
+  </div>
+  <div class="item">
+    <h3><a href="https://gazerecorder.com/gazepointer/" rel="noopener">GazePointer</a></h3>
+    <p>Free webcam eye tracking for Windows — moves the cursor with your gaze, no extra hardware.</p>
+  </div>
+  <div class="item">
+    <h3><a href="https://github.com/OptiKey/OptiKey" rel="noopener">OptiKey</a></h3>
+    <p>Free, open-source on-screen keyboard and mouse control built for eye trackers — useful to
+    control the rest of the computer beyond writing.</p>
+  </div>
+
+  <h2>Dedicated eye trackers</h2>
+  <p class="tier">Purpose-built assistive hardware: precise, works in bed and in changing light, with
+  professional support. This is the tier Tobii is known for.</p>
+  <div class="item">
+    <h3><a href="https://www.tobiidynavox.com/pages/pceye" rel="noopener">Tobii Dynavox — PCEye</a></h3>
+    <p>Compact eye tracker for Windows computers and tablets, screens up to 27". With Windows Control
+    software it clicks for you — with GazeWheel, keep dwell off in our settings and let it do the
+    clicking. This is the setup GazeWheel was designed around.</p>
+  </div>
+  <div class="item">
+    <h3><a href="https://www.tobiidynavox.com" rel="noopener">Tobii Dynavox — TD I-Series / TD Pilot</a></h3>
+    <p>Complete speech-generating devices (dedicated tablet + eye tracker + mounting), including a
+    version built around the iPad. The full-package route, often covered by insurance or public health
+    programs.</p>
+  </div>
+  <div class="item">
+    <h3><a href="https://www.irisbond.com" rel="noopener">Irisbond — Hiru</a></h3>
+    <p>Eye tracker from Spain that works on both Windows and iPad. A strong Tobii alternative,
+    common in Europe and Latin America.</p>
+  </div>
+  <div class="item">
+    <h3><a href="https://eyetechds.com" rel="noopener">EyeTech — TM5 Mini</a></h3>
+    <p>US-made assistive eye tracker for Windows, known for working well with glasses and droopy
+    eyelids.</p>
+  </div>
+
+  <h2>Head mice</h2>
+  <p class="tier">If your head still moves well, these are cheaper than eye tracking and very precise.</p>
+  <div class="item">
+    <h3><a href="https://www.quha.com" rel="noopener">Quha Zono</a></h3>
+    <p>Wireless gyroscopic mouse worn on the head (or cap, or glasses). Windows, Mac and Android.</p>
+  </div>
+  <div class="item">
+    <h3><a href="https://glassouse.com" rel="noopener">GlassOuse</a></h3>
+    <p>Glasses-shaped head mouse with a choice of switches (bite, blink, finger) for the click.</p>
+  </div>
+
+  <p class="note"><b>Independence note:</b> GazeWheel has no commercial relationship with any company on
+  this page. Nothing here is sponsored and we earn nothing from these links — they are listed because
+  they work with cursor typing. If that ever changes, it will be said here explicitly. Prices and
+  availability vary a lot by country; in Brazil, check import taxes before ordering.</p>
+
+  <footer>
+    <a href="index.html">← Back to GazeWheel</a>
+  </footer>
+
+</div>
+</body>
+</html>
