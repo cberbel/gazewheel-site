@@ -188,12 +188,16 @@
 <!-- ============ ENSINAR ============ -->
 <div class="modal" id="mLearn"><div class="box">
   <h2>Ensinar o teclado a escrever como você</h2>
-  <p class="hint">Cole aqui textos que você mesmo escreveu — reportagens, e-mails, posts. O teclado aprende suas palavras
-  e, principalmente, <b>quais palavras você costuma usar depois de quais</b>. É o jeito mais rápido de reduzir o número
-  de seleções por frase. Nada é enviado para a internet: fica salvo só neste navegador.</p>
+  <p class="hint">Cole aqui textos que você mesmo escreveu — reportagens, e-mails, posts — ou carregue arquivos de texto
+  de uma vez (útil para quem já usa outro autocomplete calibrado: exporte seus textos de lá e traga tudo aqui).
+  O teclado aprende suas palavras e, principalmente, <b>quais palavras você costuma usar depois de quais</b>. É o jeito
+  mais rápido de reduzir o número de seleções por frase. Nada é enviado para a internet: fica salvo só neste navegador.</p>
   <textarea id="learnTxt" placeholder="Cole aqui um texto seu…"></textarea>
   <div class="row">
     <button class="mini tgt" id="learnGo"><span class="fill"></span>Aprender com este texto</button>
+    <button class="mini tgt" id="learnFiles"><span class="fill"></span>📄 Aprender com arquivos</button>
+  </div>
+  <div class="row">
     <button class="mini tgt" id="learnExp"><span class="fill"></span>⬇ Exportar aprendizado</button>
     <button class="mini tgt" id="learnImp"><span class="fill"></span>⬆ Importar aprendizado</button>
   </div>
@@ -1038,8 +1042,7 @@ B("phSave", () => {
 B("phDel", () => { phrRemoveMode = !phrRemoveMode; renderPhrases(); say(phrRemoveMode ? "toque na frase que quer remover" : ""); });
 
 /* --- ensinar com texto --- */
-B("learnGo", () => {
-  const t = document.getElementById("learnTxt").value || "";
+function learnFromText(t){
   const toks = t.toLowerCase().split(/[^a-záéíóúâêôãõàçüñ]+/).filter(okWord);
   let novas = 0, pares = 0, prev = "«início»";
   const sentences = t.toLowerCase().split(/[.!?…\n]+/);
@@ -1050,8 +1053,65 @@ B("learnGo", () => {
       learnWord(w); learnPair(prev, w); pares++; prev = w;
     }
   }
+  return {toks: toks.length, novas, pares};
+}
+B("learnGo", () => {
+  const t = document.getElementById("learnTxt").value || "";
+  const r = learnFromText(t);
   rebuild(); syncCfgUI(); render();
-  say("aprendi " + toks.length + " palavras (" + novas + " novas) e " + pares + " encadeamentos", 6000);
+  say("aprendi " + r.toks + " palavras (" + r.novas + " novas) e " + r.pares + " encadeamentos", 6000);
+});
+B("learnFiles", () => {
+  const inp = document.createElement("input");
+  inp.type = "file"; inp.multiple = true;
+  inp.accept = ".txt,.md,.csv,.text,.json,text/plain,application/json";
+  inp.onchange = () => {
+    const files = Array.from(inp.files); if(!files.length) return;
+    let done = 0, toks = 0, novas = 0, pares = 0, backups = 0;
+    const finish = () => {
+      if(++done < files.length) return;
+      rebuild(); syncCfgUI(); render();
+      let msg = "li " + files.length + " arquivo" + (files.length > 1 ? "s" : "") + ": " +
+        toks + " palavras (" + novas + " novas), " + pares + " encadeamentos";
+      if(backups) msg += " e " + backups + " backup" + (backups > 1 ? "s" : "") + " mesclado" + (backups > 1 ? "s" : "");
+      say(msg, 8000);
+    };
+    for(const f of files){
+      const r = new FileReader();
+      r.onload = () => {
+        const txt = r.result || "";
+        let asBackup = null;
+        try{
+          const d = JSON.parse(txt);
+          if(d && (d.learn || d.next)) asBackup = d;
+        }catch(e){}
+        if(asBackup){
+          if(asBackup.learn){ for(const w in asBackup.learn){
+            const v = asBackup.learn[w];
+            const n = (typeof v === "number") ? v : (v && v.n) || 1;
+            const e = LEARN[w] || {n:0, d:today(), pin:0};
+            e.n += n; e.d = today();
+            LEARN[w] = e;
+          } prune(); save(K.learn, LEARN); }
+          if(asBackup.next){ for(const a in asBackup.next){
+            const m = NEXT[a] || (NEXT[a] = {});
+            for(const b in asBackup.next[a]) m[b] = (m[b] || 0) + asBackup.next[a][b];
+            const ks = Object.keys(m);
+            while(ks.length > 24){ ks.sort((x,y)=>m[x]-m[y]); delete m[ks.shift()]; }
+          } save(K.next, NEXT); }
+          if(asBackup.phr){ for(const p of asBackup.phr){ if(!PHR.includes(p)) PHR.push(p); } save(K.phr, PHR); renderPhrases(); }
+          backups++;
+        }else{
+          const res = learnFromText(txt);
+          toks += res.toks; novas += res.novas; pares += res.pares;
+        }
+        finish();
+      };
+      r.onerror = finish;
+      r.readAsText(f);
+    }
+  };
+  inp.click();
 });
 B("learnExp", () => {
   const blob = new Blob([JSON.stringify({learn:LEARN, next:NEXT, phr:PHR, cfg:cfg}, null, 1)], {type:"application/json"});
