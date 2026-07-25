@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teclado Redondo — uma voz para quem não consegue falar</title>
+<meta name="description" content="Comunicação alternativa gratuita para quem não consegue falar e escreve sem usar os dedos. Teclado circular com previsão de palavras em português, voz, frases prontas e correção no meio do texto. Funciona com rastreador ocular, mouse adaptado ou toque.">
+<style>
+  :root{--bg:#0f1420;--panel:#1a2233;--panel2:#232e46;--text:#f2f6ff;--dim:#8fa0bf;--accent:#4da3ff;--green:#59c96b;--amber:#ffd166;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,Arial,sans-serif;line-height:1.55;}
+  .wrap{max-width:880px;margin:0 auto;padding:44px 22px 70px;}
+  header{text-align:center;margin-bottom:38px;}
+  .mark{width:112px;height:112px;margin:0 auto 20px;display:block;}
+  h1{font-size:38px;letter-spacing:-.6px;margin-bottom:14px;line-height:1.18;}
+  .sub{color:var(--dim);font-size:20px;max-width:640px;margin:0 auto;}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:34px 0 44px;}
+  @media(max-width:720px){.cards{grid-template-columns:1fr;} h1{font-size:29px;} .sub{font-size:18px;}}
+  a.card{display:block;background:var(--panel);border:2px solid #2a3550;border-radius:18px;
+    padding:26px 24px;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s;}
+  a.card:hover{border-color:var(--accent);transform:translateY(-2px);}
+  a.card .tag{display:inline-block;font-size:13px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:4px 10px;border-radius:999px;margin-bottom:12px;}
+  a.card.fixa .tag{background:rgba(89,201,107,.16);color:var(--green);}
+  a.card.teste .tag{background:rgba(255,209,102,.16);color:var(--amber);}
+  a.card h2{font-size:25px;margin-bottom:8px;}
+  a.card p{color:var(--dim);font-size:17px;}
+  a.card .go{display:block;margin-top:16px;color:var(--accent);font-weight:700;font-size:17px;}
+  section{margin-bottom:36px;}
+  h3{font-size:22px;margin-bottom:10px;}
+  p{margin-bottom:13px;font-size:17.5px;}
+  .lede{font-size:20px;color:#dbe6f8;border-left:4px solid var(--amber);padding-left:18px;margin-bottom:22px;}
+  .note{background:var(--panel);border-left:4px solid var(--accent);border-radius:0 12px 12px 0;padding:16px 20px;color:#cddaf0;font-size:16.5px;}
+  footer{border-top:1px solid #2a3550;padding-top:22px;color:var(--dim);font-size:15px;text-align:center;}
+  code{background:var(--panel2);padding:2px 7px;border-radius:6px;font-size:15px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <svg class="mark" viewBox="0 0 100 100" aria-hidden="true">
+      <circle cx="50" cy="50" r="46" fill="none" stroke="#26324c" stroke-width="9"/>
+      <circle cx="50" cy="50" r="31" fill="none" stroke="#2c3a5c" stroke-width="9"/>
+      <circle cx="50" cy="50" r="12" fill="#4da3ff"/>
+      <circle cx="50" cy="4.5" r="5" fill="#4da3ff"/>
+      <circle cx="90" cy="27" r="5" fill="#59c96b"/>
+      <circle cx="90" cy="73" r="5" fill="#59c96b"/>
+      <circle cx="50" cy="95.5" r="5" fill="#59c96b"/>
+      <circle cx="10" cy="73" r="5" fill="#59c96b"/>
+      <circle cx="10" cy="27" r="5" fill="#59c96b"/>
+    </svg>
+    <h1>Para quem não consegue falar<br>e escreve sem os dedos</h1>
+    <p class="sub">Uma voz montada com o movimento que sobrou — o olhar, um dedo, a cabeça, um trackball.
+    Em português, de graça, sem instalar nada.</p>
+  </header>
+
+  <div class="cards">
+    <a class="card fixa" href="estavel.html">
+      <span class="tag">versão fixa</span>
+      <h2>Usar agora</h2>
+      <p>A versão estável, que não muda. É esta que se usa no dia a dia, sem surpresas.</p>
+      <span class="go">Abrir →</span>
+    </a>
+    <a class="card teste" href="teste.html">
+      <span class="tag">em teste</span>
+      <h2>Experimentar o novo</h2>
+      <p>Fala automática ao fechar a frase, chamador de atenção, modo conversa, correção no meio do
+      texto e aprendizado a partir dos seus próprios escritos.</p>
+      <span class="go">Experimentar →</span>
+    </a>
+  </div>
+
+  <section>
+    <p class="lede">Isto não é um teclado. É uma voz.</p>
+    <p>Quem não fala mas alcança um teclado já tem como se virar. Quem fala mas não digita pode ditar.
+    O problema existe na interseção: <b>não sair som e não alcançar as teclas</b>. Aí a pessoa fica sem
+    saída — e não é só para pedir água. É para discordar, explicar, negociar, contar uma piada,
+    escrever um texto inteiro, defender um ponto de vista. Ideia complexa também precisa sair.</p>
+    <p>Por isso o projeto não trata a comunicação como uma lista de necessidades básicas. A prioridade é
+    escrever rápido o suficiente para sustentar uma conversa de verdade: previsão que aprende o seu jeito
+    de escrever, frase que já sai falada assim que você fecha o ponto, e a possibilidade de voltar ao
+    meio do texto para corrigir uma palavra sem apagar tudo o que veio depois.</p>
+  </section>
+
+  <section>
+    <h3>Como funciona</h3>
+    <p>O alfabeto inteiro fica sempre no anel de fora, sempre no mesmo lugar — dá para achar qualquer
+    letra sem procurar. No anel de dentro aparecem só as letras que provavelmente vêm agora, grandes e
+    perto do centro. Acima da roda ficam as palavras sugeridas: aceitar uma delas costuma custar uma
+    seleção só, no lugar de cinco ou seis.</p>
+    <p>O centro da roda é uma <b>zona de descanso</b>: uma área que não faz nada, onde o cursor pode
+    parar sem acionar botão nenhum. Depois de cada seleção há uma pequena pausa automática, para um
+    cursor parado no mesmo lugar não disparar duas vezes.</p>
+  </section>
+
+  <section>
+    <h3>Para quem é</h3>
+    <p>Pessoas com ELA, paralisia cerebral, lesão medular alta, AVC de tronco, esclerose múltipla
+    avançada ou distrofia muscular — qualquer situação em que a fala se foi e as mãos não alcançam o
+    teclado.</p>
+    <p>E também para quem está temporariamente sem voz: pessoas intubadas ou traqueostomizadas em UTI,
+    que passam dias ou semanas sem conseguir falar, quase sempre conseguem mover um dedo numa tela.
+    Hoje se comunicam apontando letras num cartão de papel. Isto roda em qualquer tablet que o hospital
+    já tenha.</p>
+  </section>
+
+  <section>
+    <h3>Privacidade</h3>
+    <p class="note">O que você escreve não sai do seu computador. O vocabulário aprendido, as frases
+    salvas e os ajustes ficam guardados no próprio navegador, e você pode exportar tudo num arquivo de
+    backup a qualquer momento. Nenhum texto é enviado para nenhum servidor.</p>
+  </section>
+
+  <section>
+    <h3>Se você usa rastreador ocular</h3>
+    <p>Se o seu equipamento já faz o clique sozinho por permanência (como o Tobii Windows Control),
+    mantenha a opção <code>selecionar parando o cursor</code> desligada nos ajustes — assim não há dois
+    tempos de espera somados. Se o equipamento só move o cursor e não clica, ligue a opção e ajuste o
+    tempo até ficar confortável.</p>
+  </section>
+
+  <footer>
+    Projeto aberto de comunicação alternativa. Feito para ser copiado, adaptado e melhorado.
+  </footer>
+
+</div>
+</body>
+</html>
