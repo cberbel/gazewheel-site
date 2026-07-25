@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Teclado Redondo — versão em teste (controle por olhar)</title>
+<title>GazeWheel — test version (gaze control)</title>
 <style>
   :root{
     --bg:#0f1420;
@@ -44,7 +44,7 @@
   #tail .prev{color:#b7c5e0; font-weight:600;}
   #tail .cur{color:var(--amber);}
   #tail .caret{display:inline-block; width:5px; height:.95em; margin-left:3px; background:var(--accent); animation:blink 1.1s step-end infinite;}
-  #tail.empty::before{content:"escreva…"; color:#3d4a66; font-weight:600;}
+  #tail.empty::before{content:"write…"; color:#3d4a66; font-weight:600;}
   @keyframes blink{50%{opacity:0;}}
 
   #sugRow{display:flex; gap:14px; min-height:66px; align-items:center; justify-content:center; flex-wrap:nowrap;}
@@ -141,259 +141,281 @@
   <section id="stage">
     <div id="tail"></div>
     <div id="sugRow"></div>
-    <div id="wheelWrap"><svg id="wheel" viewBox="0 0 850 850" aria-label="teclado circular"></svg></div>
+    <div id="wheelWrap"><svg id="wheel" viewBox="0 0 850 850" aria-label="circular keyboard"></svg></div>
   </section>
 
   <aside id="side">
     <div id="out" aria-live="polite"></div>
     <div id="navRow">
       <button class="ctrl tgt" id="btnPrev"><span class="fill"></span>◀</button>
-      <button class="ctrl tgt" id="btnFix"><span class="fill"></span>✎ Corrigir</button>
+      <button class="ctrl tgt" id="btnFix"><span class="fill"></span>✎ Fix</button>
       <button class="ctrl tgt" id="btnNext"><span class="fill"></span>▶</button>
     </div>
     <div id="btns">
-      <button class="ctrl tgt wide big" id="btnSpeak"><span class="fill"></span>🔊 Falar</button>
-      <button class="ctrl tgt wide att" id="btnAtt"><span class="fill"></span>✋ Espera, estou escrevendo</button>
-      <button class="ctrl tgt" id="btnPhrases"><span class="fill"></span>💬 Frases</button>
-      <button class="ctrl tgt" id="btnTalk"><span class="fill"></span>👁 Conversa</button>
+      <button class="ctrl tgt wide big" id="btnSpeak"><span class="fill"></span>🔊 Speak</button>
+      <button class="ctrl tgt wide att" id="btnAtt"><span class="fill"></span>✋ Wait, I'm typing</button>
+      <button class="ctrl tgt" id="btnPhrases"><span class="fill"></span>💬 Phrases</button>
+      <button class="ctrl tgt" id="btnTalk"><span class="fill"></span>👁 Face to face</button>
       <button class="ctrl tgt" id="btnMode"><span class="fill"></span>123 / ?!</button>
-      <button class="ctrl tgt" id="btnPause"><span class="fill"></span>⏸ Pausar</button>
-      <button class="ctrl tgt" id="btnCfg"><span class="fill"></span>⚙ Ajustes</button>
-      <button class="ctrl tgt" id="btnLearn"><span class="fill"></span>🧠 Ensinar</button>
-      <button class="ctrl tgt wide" id="btnClear"><span class="fill"></span>🗑 Limpar</button>
+      <button class="ctrl tgt" id="btnPause"><span class="fill"></span>⏸ Pause</button>
+      <button class="ctrl tgt" id="btnCfg"><span class="fill"></span>⚙ Settings</button>
+      <button class="ctrl tgt" id="btnLearn"><span class="fill"></span>🧠 Teach</button>
+      <button class="ctrl tgt wide" id="btnClear"><span class="fill"></span>🗑 Clear</button>
     </div>
     <div id="status"></div>
-    <div class="tagline">versão em teste · seu texto e seu vocabulário ficam salvos só neste computador</div>
+    <div class="tagline">test version · your text and vocabulary are stored only on this computer</div>
   </aside>
 </div>
 
 <!-- ============ MODO CONVERSA ============ -->
 <div id="talkOverlay">
   <div id="talkText"></div>
-  <button class="close tgt" id="talkClose"><span class="fill"></span>Voltar a escrever</button>
+  <button class="close tgt" id="talkClose"><span class="fill"></span>Back to writing</button>
 </div>
 
 <!-- ============ FRASES ============ -->
 <div class="modal" id="mPhrases"><div class="box">
-  <h2>Frases prontas</h2>
-  <p class="hint">Uma seleção só, em vez de escrever tudo. Toque numa frase para inserir no texto.</p>
+  <h2>Saved phrases</h2>
+  <p class="hint">One selection instead of typing it all. Tap a phrase to insert it into the text.</p>
   <div id="phraseGrid"></div>
   <div class="row">
-    <button class="mini tgt" id="phSave"><span class="fill"></span>+ Salvar o texto atual como frase</button>
-    <button class="mini tgt" id="phDel"><span class="fill"></span>🗑 Remover uma frase</button>
+    <button class="mini tgt" id="phSave"><span class="fill"></span>+ Save current text as a phrase</button>
+    <button class="mini tgt" id="phDel"><span class="fill"></span>🗑 Remove a phrase</button>
   </div>
-  <button class="close tgt" data-close><span class="fill"></span>Fechar</button>
+  <button class="close tgt" data-close><span class="fill"></span>Close</button>
 </div></div>
 
 <!-- ============ ENSINAR ============ -->
 <div class="modal" id="mLearn"><div class="box">
-  <h2>Ensinar o teclado a escrever como você</h2>
-  <p class="hint">Cole aqui textos que você mesmo escreveu — reportagens, e-mails, posts — ou carregue arquivos de texto
-  de uma vez (útil para quem já usa outro autocomplete calibrado: exporte seus textos de lá e traga tudo aqui).
-  O teclado aprende suas palavras e, principalmente, <b>quais palavras você costuma usar depois de quais</b>. É o jeito
-  mais rápido de reduzir o número de seleções por frase. Nada é enviado para a internet: fica salvo só neste navegador.</p>
-  <textarea id="learnTxt" placeholder="Cole aqui um texto seu…"></textarea>
+  <h2>Teach the keyboard to write like you</h2>
+  <p class="hint">Paste texts you wrote yourself — articles, e-mails, posts — or load text files all at once
+  (useful if you already use another calibrated autocomplete: export your texts from there and bring them here).
+  The keyboard learns your words and, above all, <b>which words you tend to use after which</b>. It is the fastest
+  way to cut the number of selections per sentence. Nothing is sent to the internet: it stays in this browser only.</p>
+  <textarea id="learnTxt" placeholder="Paste one of your texts here…"></textarea>
   <div class="row">
-    <button class="mini tgt" id="learnGo"><span class="fill"></span>Aprender com este texto</button>
-    <button class="mini tgt" id="learnFiles"><span class="fill"></span>📄 Aprender com arquivos</button>
+    <button class="mini tgt" id="learnGo"><span class="fill"></span>Learn from this text</button>
+    <button class="mini tgt" id="learnFiles"><span class="fill"></span>📄 Learn from files</button>
   </div>
   <div class="row">
-    <button class="mini tgt" id="learnExp"><span class="fill"></span>⬇ Exportar aprendizado</button>
-    <button class="mini tgt" id="learnImp"><span class="fill"></span>⬆ Importar aprendizado</button>
+    <button class="mini tgt" id="learnExp"><span class="fill"></span>⬇ Export learning</button>
+    <button class="mini tgt" id="learnImp"><span class="fill"></span>⬆ Import learning</button>
   </div>
   <div class="row"><label id="learnStats"></label></div>
-  <button class="close tgt" data-close><span class="fill"></span>Fechar</button>
+  <button class="close tgt" data-close><span class="fill"></span>Close</button>
 </div></div>
 
 <!-- ============ AJUSTES ============ -->
 <div class="modal" id="mCfg"><div class="box">
-  <h2>Ajustes</h2>
-  <p class="hint">Pensado para quem controla o cursor com os olhos. Se o seu equipamento já faz o clique sozinho
-  (Tobii Windows Control, por exemplo), deixe a seleção por permanência <b>desligada</b> para não haver dois tempos de espera.</p>
+  <h2>Settings</h2>
+  <p class="hint">Made for people who control the cursor with their eyes. If your equipment already clicks by itself
+  (Tobii Windows Control, for example), keep dwell selection <b>off</b> so there are no two wait times stacked.</p>
 
-  <div class="row"><label>Selecionar parando o cursor (dwell)</label>
+  <div class="row"><label>Select by pausing the cursor (dwell)</label>
     <button class="mini tgt" id="cfgDwell"><span class="fill"></span>—</button></div>
-  <div class="row"><label>Tempo de permanência</label>
+  <div class="row"><label>Dwell time</label>
     <button class="mini tgt" id="dwellDown"><span class="fill"></span>−</button>
     <span class="val" id="dwellVal"></span>
     <button class="mini tgt" id="dwellUp"><span class="fill"></span>+</button></div>
-  <div class="row"><label>Tamanho da roda</label>
+  <div class="row"><label>Wheel size</label>
     <button class="mini tgt" id="szDown"><span class="fill"></span>−</button>
     <span class="val" id="szVal"></span>
     <button class="mini tgt" id="szUp"><span class="fill"></span>+</button></div>
-  <div class="row"><label>Tamanho do texto</label>
+  <div class="row"><label>Text size</label>
     <button class="mini tgt" id="fsDown"><span class="fill"></span>−</button>
     <span class="val" id="fsVal"></span>
     <button class="mini tgt" id="fsUp"><span class="fill"></span>+</button></div>
-  <div class="row"><label>Ordem das letras do anel interno</label>
+  <div class="row"><label>Inner ring letter order</label>
     <button class="mini tgt" id="cfgOrder"><span class="fill"></span>—</button></div>
-  <div class="row"><label>Quantas letras no anel interno</label>
+  <div class="row"><label>Letters in the inner ring</label>
     <button class="mini tgt" id="cfgN"><span class="fill"></span>—</button></div>
-  <div class="row"><label>Mostrar o alfabeto completo por fora</label>
+  <div class="row"><label>Show the full alphabet outside</label>
     <button class="mini tgt" id="cfgOuter"><span class="fill"></span>—</button></div>
-  <div class="row"><label>Alto contraste</label>
+  <div class="row"><label>High contrast</label>
     <button class="mini tgt" id="cfgHC"><span class="fill"></span>—</button></div>
-  <div class="row"><label>Falar sozinho ao fechar a frase</label>
+  <div class="row"><label>Speak automatically at end of sentence</label>
     <button class="mini tgt" id="cfgAuto"><span class="fill"></span>—</button></div>
-  <div class="row"><label>Velocidade da voz</label>
+  <div class="row"><label>Voice speed</label>
     <button class="mini tgt" id="rateDown"><span class="fill"></span>−</button>
     <span class="val" id="rateVal"></span>
     <button class="mini tgt" id="rateUp"><span class="fill"></span>+</button></div>
-  <div class="row"><label>Voz</label>
+  <div class="row"><label>Voice</label>
     <button class="mini tgt" id="cfgVoice"><span class="fill"></span>—</button></div>
-  <button class="close tgt" data-close><span class="fill"></span>Fechar</button>
+  <button class="close tgt" data-close><span class="fill"></span>Close</button>
 </div></div>
 
 <script>
 "use strict";
 
 /* ================================================================
-   1. VOCABULÁRIO
-   Base de frequência do português + formas conjugadas dos verbos que
-   mais aparecem na fala do dia a dia + vocabulário de cuidado/saúde
-   + vocabulário de mobilidade urbana, acessibilidade e jornalismo.
+   1. VOCABULARY
+   English frequency base + inflected forms of the most spoken verbs
+   + daily care/health vocabulary
+   + urban mobility, accessibility and journalism vocabulary.
    ================================================================ */
 const BASE = [
-"que","de","não","o","a","e","do","da","em","um","para","com","uma","os","no","se","na","por","mais","as",
-"dos","como","mas","foi","ao","ele","das","tem","à","seu","sua","ou","ser","quando","muito","há","nos","já","está","eu",
-"também","só","pelo","pela","até","isso","ela","entre","era","depois","sem","mesmo","aos","ter","seus","quem","nas","me","esse","eles",
-"estão","você","tinha","foram","essa","num","nem","suas","meu","às","minha","têm","numa","pelos","elas","havia","seja","qual","será","nós",
-"tenho","lhe","deles","essas","esses","pelas","este","fosse","dele","é","são","vai","estar","fazer","dizer","poder","ir","ver","dar","saber",
-"querer","chegar","passar","dever","ficar","falar","deixar","encontrar","chamar","vir","pensar","sair","voltar","começar","conhecer","sentir","viver","contar","olhar","parecer",
-"esperar","sim","agora","hoje","amanhã","ontem","aqui","ali","bem","bom","boa","dia","noite","tarde","manhã","casa","tempo","ano","anos","vez",
-"vezes","gente","pessoa","pessoas","coisa","coisas","vida","mundo","homem","mulher","parte","lugar","momento","forma","caso","grupo","trabalho","ponto","cidade","país",
-"água","comida","fome","sede","banheiro","dor","cabeça","remédio","médico","ajuda","ajudar","obrigado","obrigada","favor","quero","preciso","gosto","amo","amor","sinto",
-"cansado","cansada","feliz","triste","frio","calor","sono","dormir","comer","beber","tomar","banho","televisão","música","telefone","celular","computador","internet","janela","porta",
-"luz","cama","cadeira","mesa","carro","rua","família","mãe","pai","filho","filha","irmão","irmã","avó","avô","tio","tia","amigo","amiga","estou",
-"estava","estamos","posso","pode","podemos","quer","queria","vou","vamos","vem","fica","fico","sei","sabe","faço","faz","gostaria","ainda","assim","então",
-"porque","onde","quanto","quanta","quantos","tudo","nada","algo","alguém","ninguém","todo","toda","todos","todas","outro","outra","outros","outras","cada","qualquer",
-"alguns","algumas","muita","muitos","muitas","pouco","pouca","poucos","poucas","grande","pequeno","pequena","novo","nova","velho","velha","primeiro","primeira","segundo","melhor",
-"pior","maior","menor","dois","duas","três","quatro","cinco","seis","sete","oito","nove","dez","segunda","terça","quarta","quinta","sexta","sábado","domingo",
-"semana","mês","hora","horas","minuto","minutos","talvez","claro","certo","certa","errado","errada","verdade","mentira","desculpa","desculpe","licença","parabéns","saudade","beijo",
-"abraço","tchau","oi","olá","dormiu","acordar","acordei","levantar","sentar","deitar","andar","correr","parar","abrir","fechar","ligar","desligar","ligue","desligue",
-"mudar","canal","volume","aumentar","diminuir","quente","gelado","doce","salgado","gostoso","ruim","dói","doendo","coceira","posição","almofada","travesseiro","coberta","cobertor",
-"roupa","camisa","calça","sapato","óculos","escola","ler","escrever","livro","jogo","jogar","filme","futebol","time","notícia","chuva","sol","vento","praia","viagem",
-"passear","visita","visitar","igreja","festa","aniversário","presente","natal","almoço","jantar","café","lanche","fruta","suco","leite","pão",
-"arroz","feijão","carne","frango","peixe","sopa","bolo","chocolate","sorvete","banana","maçã","laranja","enfermeira","enfermeiro","hospital","consulta","exame","fisioterapia","cuidadora",
-"cuidador","rodas","banheira","fralda","trocar","limpar","coçar","virar","ajeitar","perna","braço","mão","pé","olho","olhos","boca","nariz","ouvido",
-"dente","barriga","costas","pescoço","coração","respirar","respiração","tosse","febre","gripe","dormente","apertado","solto","devagar","rápido","cuidado","atenção",
-"importante","urgente","emergência","socorro","ambulância","calma","tranquilo","tranquila","nervoso","nervosa","preocupado","preocupada","medo","raiva","alegria","chorar","rir","sorrir",
-"conversar","perguntar","responder","pergunta","resposta","história","piada","segredo","surpresa","ideia","plano","problema","solução","dinheiro","comprar","pagar","conta","banco","mercado","farmácia",
-"loja","padaria","restaurante","ônibus","táxi","moto","bicicleta","avião","longe","perto","dentro","fora","cima","baixo","frente","atrás","lado","meio",
-"antes","durante","sempre","nunca","cedo","logo","último","última","próximo","próxima","juntos","junto","sozinho","sozinha","comigo","contigo","conosco"
+"the","of","and","a","to","in","is","you","that","it","he","was","for","on","are","as","with","his","they","i",
+"at","be","this","have","from","or","one","had","by","but","not","what","all","were","we","when","your","can","said","there",
+"use","an","each","which","she","do","how","their","if","will","up","other","about","out","many","then","them","these","so","some",
+"her","would","make","like","him","into","time","has","look","two","more","write","go","see","no","way","could","people","my","than",
+"first","water","been","call","who","its","now","find","long","down","day","did","get","come","made","may","part","over","new","take",
+"only","little","know","place","year","me","back","give","most","very","after","thing","our","just","name","good","think","say","great","where",
+"through","much","before","too","same","us","yes","please","thank","thanks","help","want","need","feel","pain","bathroom","toilet","food","hungry","thirsty",
+"tired","sleep","sleepy","cold","hot","nurse","doctor","medicine","head","leg","arm","hand","foot","eye","eyes","mouth","nose","ear","neck","chest",
+"stomach","heart","breath","cough","fever","itchy","position","pillow","blanket","turn","move","lift","lower","left","right","chair","bed","room","window","door",
+"light","tv","television","music","phone","computer","internet","channel","volume","louder","quieter","morning","afternoon","evening","night","today","tomorrow","yesterday","week","month",
+"hour","minute","family","wife","husband","mother","father","son","daughter","brother","sister","friend","love","miss","happy","sad","angry","scared","worried","calm",
+"fine","bad","better","worse","big","small","old","home","house","work","school","book","movie","game","news","weather","rain","sun","wind","beach",
+"trip","visit","church","party","birthday","gift","christmas","lunch","dinner","breakfast","coffee","snack","fruit","juice","milk","bread","rice","beans","meat","chicken",
+"fish","soup","cake","chocolate","banana","apple","orange","hospital","appointment","exam","therapy","physiotherapy","caregiver","wheelchair","diaper","clean","scratch","adjust","slow","fast",
+"careful","attention","important","urgent","emergency","ambulance","joke","secret","surprise","idea","plan","problem","solution","money","buy","pay","bill","bank","market","pharmacy",
+"store","bakery","restaurant","bus","taxi","car","bike","plane","far","near","inside","outside","above","below","front","behind","beside","middle","during","always",
+"never","early","soon","late","last","next","together","alone","maybe","sure","wrong","true","false","sorry","excuse","congratulations","kiss","hug","bye","hi",
+"hello","something","nothing","everything","anything","someone","nobody","everyone","every","any","again","still","here","also","really","because","why","how's","let's","don't",
+"can't","i'm","it's","that's","won't","didn't","doesn't","isn't","wasn't","couldn't","wouldn't","i'll","we'll","you're","i've","there's","what's"
 ];
 
-/* formas conjugadas dos verbos mais falados — o que a pessoa realmente digita */
+/* inflected forms of the most spoken verbs — what people actually type */
 const VERBOS = [
-"sou","era","seria","somos","fui","serei","estive","esteve","estivemos","estarei","estaria",
-"tenho","temos","tive","terei","teria","tinha","tinham","tenha",
-"faço","fiz","fizemos","farei","faria","fazia","faça","fazendo",
-"vou","vamos","vai","vão","fui","irei","iria","indo",
-"venho","veio","viemos","virá","viria","venha","vindo",
-"digo","disse","dissemos","direi","diria","diga","dizendo",
-"falo","falei","falou","falamos","falarei","falaria","fale","falando",
-"vejo","viu","vimos","verei","veria","veja","vendo",
-"dou","deu","demos","darei","daria","dê","dando",
-"sei","sabia","soube","saberei","saberia","saiba","sabendo",
-"posso","podia","pude","poderei","poderia","possa","podendo",
-"consigo","consegue","conseguir","consegui","conseguiria","conseguindo",
-"quero","queria","quis","quisera","queremos","querendo",
-"preciso","precisa","precisava","precisei","precisamos","precisando",
-"gostaria","gostei","gostava","gostando",
-"sinto","sente","sentia","senti","sentindo",
-"acho","achei","achava","achando",
-"penso","pensei","pensando","lembro","lembrei","lembrando","esqueci","esquecendo",
-"escrevo","escrevi","escrevendo","leio","li","lendo","ouço","ouvi","ouvindo",
-"entendo","entendi","entendendo","explico","expliquei","mostrar","mostro","mostrei",
-"chamo","chame","chamando","peço","peça","pedi","pedindo",
-"traga","trouxe","trazendo","leve","levei","levando","coloque","coloquei",
-"tire","tirei","abra","abri","feche","fechei","aumente","diminua",
-"mude","mudei","vire","virei","ajeite","ajeitei","levante","levantei",
-"deite","deitei","sente","sentei","pare","parei","espere","esperei",
-"continue","continuei","volte","voltei","cheguei","chegou","saí","saiu",
-"mande","mandei","mandando","envie","enviei","enviando","responda","respondi","respondendo",
-"marque","marquei","marcando","combine","combinei","avise","avisei","avisando"
+"am","being","been",
+"has","had","having",
+"does","did","doing","done",
+"goes","went","going","gone",
+"got","gotten","getting",
+"makes","made","making",
+"knows","knew","known","knowing",
+"thinks","thought","thinking",
+"takes","took","taken","taking",
+"sees","saw","seen","seeing",
+"comes","came","coming",
+"wants","wanted","wanting",
+"needs","needed","needing",
+"feels","felt","feeling",
+"gives","gave","given","giving",
+"tells","told","telling",
+"works","worked","working",
+"calls","called","calling",
+"tries","tried","trying",
+"asks","asked","asking",
+"leaves","leaving","puts","putting",
+"means","meant","keeps","kept","lets","letting",
+"begins","began","begun","seems","seemed",
+"talks","talked","talking",
+"turns","turned","turning",
+"starts","started","starting","stops","stopped",
+"shows","showed","shown","hears","heard","hearing",
+"plays","played","playing","runs","ran","running",
+"moves","moved","moving","likes","liked","lives","lived","living",
+"believes","believed","holds","held","brings","brought","happens","happened",
+"writes","wrote","written","writing","sits","sat","sitting",
+"stands","stood","standing","loses","lost","pays","paid","meets","met",
+"learns","learned","learning","changes","changed","changing",
+"understands","understood","watches","watched","watching","follows","followed",
+"speaks","spoke","spoken","speaking","reads","reading",
+"spends","spent","grows","grew","opens","opened","opening","closes","closed","closing",
+"walks","walked","walking","wins","won","offers","offered",
+"remembers","remembered","remembering","forgets","forgot","forgotten",
+"loves","loved","waits","waited","waiting","sends","sent","sending",
+"builds","built","stays","stayed","staying","falls","fell","fallen",
+"reaches","reached","remains","remained",
+"eats","ate","eaten","eating","drinks","drank","drunk","drinking",
+"sleeps","slept","sleeping","wakes","woke","woken","waking",
+"helps","helped","helping","thanks","thanked","rests","rested","resting",
+"breathes","breathed","breathing","washes","washed","dresses","dressed",
+"lies","lay","lying","carries","carried","carrying",
+"lifts","lifted","lifting","pushes","pushed","pulls","pulled",
+"answers","answered","answering","replies","replied","replying",
+"schedules","scheduled","scheduling","confirms","confirmed","reminds","reminded",
+"explains","explained","explaining","listens","listened","listening"
 ];
 
-/* mobilidade urbana, acessibilidade, tecnologia assistiva, jornalismo */
+/* urban mobility, accessibility, assistive technology, journalism */
 const AREA = [
-"acessibilidade","acessível","acessíveis","inacessível","mobilidade","urbana","urbano","urbanismo",
-"calçada","calçadas","rampa","rampas","piso","tátil","guia","rebaixamento","faixa","pedestre","pedestres",
-"travessia","semáforo","estacionamento","vaga","vagas","elevador","plataforma","degrau","degraus","obstáculo",
-"transporte","público","coletivo","metrô","trem","terminal","estação","parada","itinerário","tarifa",
-"inclusão","inclusivo","inclusiva","exclusão","barreira","barreiras","adaptado","adaptada","adaptação",
-"deficiência","deficiências","deficiente","pessoa","cadeirante","cadeirantes","mobilidade","reduzida",
-"autonomia","independência","direito","direitos","lei","leis","norma","decreto","política","pública",
-"prefeitura","município","governo","secretaria","gestão","fiscalização","denúncia","reclamação",
-"projeto","projetos","obra","obras","reforma","orçamento","prazo","cronograma",
-"reportagem","matéria","matérias","pauta","pautas","entrevista","entrevistado","apuração","fonte","fontes",
-"texto","artigo","coluna","editorial","post","publicação","redação","edição","editor","jornalista","jornalismo",
-"leitor","leitores","audiência","alcance","engajamento","newsletter","site","portal","blog","link","links",
-"empresa","parceria","parceiro","patrocínio","patrocinador","proposta","contrato","reunião","agenda",
-"evento","palestra","painel","mesa","debate","prêmio","podcast","vídeo","áudio","legenda","transcrição",
-"tecnologia","assistiva","comunicação","alternativa","aumentativa","equipamento","equipamentos","software",
-"rastreador","ocular","olhar","teclado","tela","cursor","clique","piscar","calibrar","calibração",
-"voz","sintetizada","síntese","fala","escrita","digitação","predição","atalho",
-"esclerose","lateral","amiotrófica","neurologista","fisioterapeuta","fonoaudióloga","fonoaudiólogo",
-"terapeuta","ocupacional","nutricionista","diagnóstico","tratamento","evolução","progressão","sintoma",
-"respirador","ventilação","traqueostomia","aspiração","sonda","gastrostomia","saturação","oxigênio",
-"pesquisa","estudo","associação","instituto","ong","doação","doador","campanha","apoio","apoiar","apoiador",
-"agradeço","agradecer","abraços","atenciosamente","cordialmente","obrigado","valeu","parabéns"
+"accessibility","accessible","inaccessible","mobility","urban","city","sidewalk","sidewalks",
+"ramp","ramps","tactile","paving","curb","crossing","crosswalk","pedestrian","pedestrians",
+"traffic","parking","elevator","platform","step","steps","obstacle","obstacles",
+"transport","transportation","public","transit","subway","train","terminal","station","route","fare",
+"inclusion","inclusive","exclusion","barrier","barriers","adapted","adaptation",
+"disability","disabilities","disabled","person","reduced","users",
+"autonomy","independence","rights","law","laws","regulation","policy","policies",
+"government","council","complaint","inspection","management",
+"project","projects","construction","renovation","budget","deadline","timeline",
+"reporting","article","articles","piece","interview","interviewed","source","sources",
+"text","column","editorial","post","publication","newsroom","editing","editor","journalist","journalism",
+"reader","readers","audience","reach","engagement","newsletter","site","portal","blog","link","links",
+"company","partnership","partner","sponsorship","sponsor","proposal","contract","meeting","agenda",
+"event","lecture","panel","debate","award","podcast","video","audio","caption","transcript",
+"technology","assistive","communication","alternative","augmentative","equipment","software",
+"tracker","tracking","gaze","keyboard","screen","cursor","click","blink","calibrate","calibration",
+"voice","synthesized","synthesis","speech","typing","prediction","shortcut",
+"sclerosis","lateral","amyotrophic","neurologist","physiotherapist","speech-language",
+"therapist","occupational","nutritionist","diagnosis","treatment","progression","symptom",
+"ventilator","ventilation","tracheostomy","suction","tube","gastrostomy","saturation","oxygen",
+"research","study","association","institute","nonprofit","donation","donor","campaign","support","supporter",
+"grateful","gratitude","regards","sincerely","cheers","congrats"
 ];
 
 const WORDS = Array.from(new Set(
   BASE.concat(VERBOS).concat(AREA)
       .map(w => w.toLowerCase())
-      .filter(w => /^[a-záéíóúâêôãõàçüñ]+$/i.test(w))
+      .filter(w => /^[a-z']+$/i.test(w))
 ));
 
-const OUTER_ABC = ["a","b","c","ç","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"];
+const OUTER_ABC = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"];
 const OUTER_SYM = ["0","1","2","3","4","5","6","7","8","9",".",",","?","!","-","'",":",";","(",")","@","/","+","=","%","\"","*"];
 const SYM_PAGES = [["1","2","3","4","5","6"],["7","8","9","0",".",","],["?","!","-","'",":","%"],["@","/","(",")","\"",";"]];
 
-/* Bigramas de partida: o que costuma vir depois de quê.
-   O aprendizado do usuário se soma a isto e passa a mandar mais. */
+/* Starter bigrams: what tends to come after what.
+   The user's own learning adds to this and gradually takes over. */
 const SEED_NEXT = {
-"«início»":{"eu":6,"não":5,"estou":5,"preciso":5,"quero":5,"pode":4,"por":4,"obrigado":3,"bom":3,"boa":3,"você":3,"o":3,"a":3,"me":3,"vamos":3,"oi":2,"olá":2,"acabei":2},
-"eu":{"quero":6,"preciso":6,"estou":6,"vou":5,"não":5,"tenho":4,"acho":4,"posso":3,"gosto":3,"sinto":3,"também":2,"já":2},
-"estou":{"com":6,"bem":4,"cansado":4,"sentindo":3,"escrevendo":3,"aqui":2,"melhor":2,"pior":2,"triste":2},
-"com":{"dor":5,"fome":5,"sede":5,"sono":4,"frio":3,"calor":3,"medo":2,"você":3,"a":2,"o":2,"ele":2,"ela":2},
-"preciso":{"de":6,"ir":5,"falar":4,"que":3,"do":3,"da":3,"trocar":2,"descansar":2,"responder":2},
-"quero":{"ir":4,"falar":4,"água":4,"ver":3,"comer":3,"dormir":3,"descansar":3,"mudar":3,"escrever":3,"que":2},
-"pode":{"me":6,"vir":3,"ser":3,"chamar":3,"trazer":3,"ajudar":3,"ajeitar":3,"levantar":2},
-"me":{"ajudar":5,"dar":3,"trazer":3,"chamar":2,"levar":2,"escuta":2,"ajeita":2},
-"por":{"favor":8,"que":5,"enquanto":2,"isso":2},
-"muito":{"obrigado":4,"bom":3,"bem":2,"importante":2,"cansado":2},
-"não":{"consigo":4,"estou":3,"quero":3,"sei":3,"é":3,"precisa":2,"tem":2},
-"vou":{"escrever":3,"falar":3,"responder":2,"mandar":2,"tentar":2,"ver":2},
-"de":{"acessibilidade":3,"mobilidade":3,"rodas":3,"água":3,"cadeira":3,"novo":2,"transporte":2},
-"cadeira":{"de":7},
-"mobilidade":{"urbana":6,"reduzida":5},
-"tecnologia":{"assistiva":7},
-"comunicação":{"alternativa":6},
-"esclerose":{"lateral":7},
-"lateral":{"amiotrófica":7},
-"transporte":{"público":7,"coletivo":4},
-"piso":{"tátil":6},
-"faixa":{"de":5},
-"política":{"pública":5},
-"bom":{"dia":8},
-"boa":{"tarde":6,"noite":6},
-"obrigado":{"por":4,"pela":3,"pelo":3},
-"tudo":{"bem":6,"certo":3},
-"vamos":{"marcar":3,"conversar":3,"falar":2,"ver":2},
-"a":{"gente":4,"cidade":2,"calçada":2,"pauta":2,"matéria":2,"reportagem":2},
-"o":{"que":6,"texto":2,"link":2,"portal":2,"projeto":2,"prazo":2}
+"«início»":{"i":8,"the":4,"can":4,"please":3,"yes":3,"no":3,"thank":3,"good":3,"my":2,"we":2,"it":2,"what":2,"call":2,"i'm":2,"let's":2,"hi":2},
+"i":{"need":6,"want":6,"am":6,"have":4,"can":4,"feel":3,"think":3,"like":3,"will":2,"would":2,"can't":2,"don't":2},
+"i'm":{"tired":4,"fine":3,"hungry":3,"thirsty":3,"in":3,"cold":2,"hot":2,"writing":2,"not":2},
+"am":{"tired":4,"fine":3,"hungry":3,"thirsty":3,"in":3,"cold":2,"hot":2,"writing":2,"not":2},
+"need":{"to":6,"help":4,"water":4,"the":3,"a":3,"rest":2},
+"want":{"to":6,"water":3,"food":2,"the":2,"more":2},
+"to":{"go":4,"eat":3,"sleep":3,"drink":3,"talk":3,"rest":2,"change":2,"write":2,"see":2,"the":2},
+"can":{"you":6,"we":3,"i":3},
+"can't":{"feel":2,"move":2,"sleep":2,"breathe":2},
+"you":{"help":4,"please":3,"bring":3,"call":3,"come":2,"turn":2},
+"thank":{"you":8},
+"good":{"morning":6,"night":5,"afternoon":4,"idea":2},
+"help":{"me":6,"please":4},
+"call":{"the":5,"my":3,"a":2},
+"the":{"nurse":4,"bathroom":3,"doctor":3,"pain":2,"light":2,"tv":2,"article":2,"city":2},
+"in":{"pain":5,"bed":3,"the":3,"my":2},
+"my":{"head":3,"back":3,"leg":3,"arm":2,"wife":2,"family":2,"eyes":2},
+"change":{"position":5,"the":3,"channel":2},
+"turn":{"on":4,"off":4,"the":3,"me":3},
+"wait":{"a":4,"please":3},
+"a":{"little":4,"lot":3,"bit":3,"moment":3},
+"let":{"me":6},
+"let's":{"talk":3,"go":3,"schedule":2},
+"me":{"know":3,"up":2,"see":2,"water":2},
+"it":{"is":5,"hurts":4},
+"it's":{"good":2,"cold":2,"hot":2,"time":2},
+"is":{"the":3,"not":3,"good":2},
+"not":{"now":3,"yet":2,"good":2},
+"assistive":{"technology":7},
+"eye":{"tracking":5,"tracker":4},
+"urban":{"mobility":6},
+"public":{"transport":5,"transportation":4,"policy":3},
+"lateral":{"sclerosis":7},
+"amyotrophic":{"lateral":7},
+"reduced":{"mobility":6},
+"tactile":{"paving":6},
+"we":{"can":3,"need":3,"talk":2,"schedule":2},
+"what":{"do":3,"is":3,"about":2,"time":2}
 };
 
-/* Encadeamento de letras — usado só quando o prefixo não bate com
-   nenhuma palavra conhecida (nomes próprios, gírias, siglas). */
+/* Letter chaining — used only when the prefix matches no known word
+   (proper names, slang, acronyms). */
 const CHAR_NEXT = {
- a:"srnidclmtugpvebfzo", b:"aeoirulm", c:"aoieruhs", "ç":"ãaoóe", d:"aeoiur", e:"snrmlditcugvpaz",
- f:"aoieru", g:"auoreiu", h:"aeiou", i:"nsacdoterlmvgpz", j:"aouei", k:"aeiou", l:"aeioiuh",
- m:"aeoiubp", n:"tdaeiocsgu", o:"srnaumdiclpgtvbe", p:"aeoriul", q:"u", r:"aeioumnsdtpcv",
- s:"aeioutcpmns", t:"aeioruúmns", u:"tnrmscldiaepg", v:"aeioi", w:"aeio", x:"aeioup",
- y:"aeio", z:"aeioá"
+ a:"ntlrsdcmbgvpiykuwf", b:"eoalruiy", c:"oahektiruly", d:"eioaursy", e:"rsndaltcemvpxfiy",
+ f:"oiraeul", g:"ehoairlun", h:"eaiotursy", i:"ntsclomdvregfapk", j:"ouaei", k:"einsly", l:"eialoyudst",
+ m:"eaoiupsby", n:"gdteoicasuk", o:"nurftmwlopsdvicek", p:"eroalihu", q:"u", r:"eoaistdunmykcl",
+ s:"tehoiaupcmklnwy", t:"hoeiarustlywc", u:"rntslecpgmdbai", v:"eiao", w:"aihoenrs", x:"ptcaie",
+ y:"osetiam", z:"eaoi"
 };
 
 /* ================================================================
@@ -403,7 +425,7 @@ const K = {cfg:"tr2.cfg", learn:"tr2.learn", next:"tr2.next", text:"tr2.text", p
 const load = (k,d) => { try{ const v=JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } };
 const save = (k,v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} };
 const today = () => Math.floor(Date.now()/86400000);
-const strip = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+const strip = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/'/g,"").toLowerCase();
 const HALF_LIFE = 75;   /* dias: uma palavra sem uso perde metade do peso */
 
 let LEARN = load(K.learn, {});
@@ -431,10 +453,10 @@ function wWeight(i){
   const base = i < WORDS.length ? 1/(i + 15) : 0.004;
   return base + 0.05 * Math.min(used(ALL[i]), 40);
 }
-function okWord(w){ return /^[a-záéíóúâêôãõàçüñ]{2,}$/i.test(w); }
+function okWord(w){ return /^(?:[ai]|[a-z][a-z']+)$/i.test(w); }
 
 function learnWord(w){
-  w = (w||"").trim().toLowerCase().replace(/^[^a-záéíóúâêôãõàçüñ]+|[^a-záéíóúâêôãõàçüñ]+$/gi,"");
+  w = (w||"").trim().toLowerCase().replace(/^[^a-z']+|[^a-z']+$/gi,"");
   if(!okWord(w)) return null;
   const e = LEARN[w] || {n:0, d:today(), pin:0};
   e.n = e.n + 1; e.d = today();
@@ -482,7 +504,7 @@ function prevWord(){
   if(!m) return "«início»";
   const raw = m[1];
   if(/[.!?…]$/.test(raw)) return "«início»";
-  const w = raw.toLowerCase().replace(/^[^a-záéíóúâêôãõàçüñ]+|[^a-záéíóúâêôãõàçüñ]+$/gi,"");
+  const w = raw.toLowerCase().replace(/^[^a-z']+|[^a-z']+$/gi,"");
   return w || "«início»";
 }
 function nextMap(){
@@ -534,9 +556,9 @@ function letterScores(){
 function charFallback(){
   const p = strip(prefix());
   const last = p ? p[p.length-1] : "";
-  const seq = (CHAR_NEXT[last] || "aeosrindmutclpvghqbfzjxkwy").split("");
+  const seq = (CHAR_NEXT[last] || "etaoinsrhldcumfpgwybvkxjqz").split("");
   const seen = new Set(), out = [];
-  for(const c of seq.concat("aeosrindmutclpvghqbfzjxkwy".split(""))){
+  for(const c of seq.concat("etaoinsrhldcumfpgwybvkxjqz".split(""))){
     if(!seen.has(c) && OUTER_ABC.includes(c)){ seen.add(c); out.push(c); }
   }
   return out;
@@ -547,7 +569,7 @@ function autoN(sc, ranked){
   for(const l of ranked){ acc += sc[l]; n++; if(acc/tot >= 0.92) break; }
   return Math.max(4, Math.min(8, n));
 }
-const cmpAlpha = (a,b) => a.localeCompare(b, "pt-BR");
+const cmpAlpha = (a,b) => a.localeCompare(b, "en");
 
 function pages(){
   if(mode === "sym") return SYM_PAGES;
@@ -696,12 +718,12 @@ function drawWheel(){
 
   /* anel de funções — 6 setores, os dois de apagar longe do espaço */
   const FN = [
-    {ic:"",   lb:"espaço",  fn:doSpace},
-    {ic:"🔊", lb:"falar",   fn:doSpeak},
-    {ic:"↻",  lb:"trocar",  fn:doSwap},
-    {ic:"⌫",  lb:"letra",   fn:doBack,     danger:1},
-    {ic:"⌫⌫", lb:"palavra", fn:doBackWord, danger:1},
-    {ic:"⤺",  lb:"desfazer",fn:doUndo}
+    {ic:"",   lb:"space",  fn:doSpace},
+    {ic:"🔊", lb:"speak",  fn:doSpeak},
+    {ic:"↻",  lb:"more",   fn:doSwap},
+    {ic:"⌫",  lb:"letter", fn:doBack,     danger:1},
+    {ic:"⌫⌫", lb:"word",   fn:doBackWord, danger:1},
+    {ic:"⤺",  lb:"undo",   fn:doUndo}
   ];
   FN.forEach((q,i) => {
     const a0 = i*60 - 30;
@@ -722,7 +744,7 @@ function drawWheel(){
   /* zona de descanso — inerte de propósito */
   svg.appendChild(E("circle", {cx:CX, cy:CY, r:REST, id:"restZone"}));
   const r1 = E("text", {x:CX, y:CY-16, class:"restTxt", "font-size":"22"});
-  r1.textContent = "descanso";
+  r1.textContent = "rest";
   const r2 = E("text", {x:CX, y:CY+16, class:"restTxt", "font-size":"26"});
   r2.textContent = ps.length > 1 ? (page+1) + "/" + ps.length : "•";
   svg.appendChild(r1); svg.appendChild(r2);
@@ -776,15 +798,15 @@ function attention(){
       o.start(t); o.stop(t + 0.26);
     });
   }catch(e){}
-  setTimeout(() => speak("Espera, estou escrevendo."), 700);
-  say("chamando atenção…");
+  setTimeout(() => speak("Wait — I'm typing."), 700);
+  say("calling attention…");
 }
 
 /* modo conversa: o texto grande, para quem está do outro lado ler */
 function openTalk(){
   const t = document.getElementById("talkText");
   const v = text.trim();
-  t.textContent = v || "o que você escrever aparece aqui, grande, para a outra pessoa ler";
+  t.textContent = v || "what you write shows up here, large, for the other person to read";
   t.classList.toggle("vazio", !v);
   document.getElementById("talkOverlay").classList.add("on");
   if(v) speak(v);
@@ -815,7 +837,7 @@ function doBackWord(){
   text = b + text.slice(caret); caret = b.length; page = 0; render();
 }
 function doUndo(){
-  if(!undoStack.length){ say("nada para desfazer"); return; }
+  if(!undoStack.length){ say("nothing to undo"); return; }
   const s = undoStack.pop(); text = s.t; caret = s.c; page = 0; render();
 }
 function doSwap(){ page = (page + 1) % pages().length; drawWheel(); }
@@ -824,14 +846,14 @@ function doSpeak(){ speak(text); }
 let voices = [];
 function pickVoice(){
   if(cfg.voice){ const v = voices.find(v => v.name === cfg.voice); if(v) return v; }
-  return voices.find(v => /pt[-_]BR/i.test(v.lang)) || voices.find(v => /^pt/i.test(v.lang)) || null;
+  return voices.find(v => /en[-_]US/i.test(v.lang)) || voices.find(v => /^en/i.test(v.lang)) || null;
 }
 function speak(t){
-  if(!("speechSynthesis" in window)){ say("voz não disponível neste navegador"); return; }
-  if(!t.trim()){ say("nada escrito ainda"); return; }
+  if(!("speechSynthesis" in window)){ say("voice not available in this browser"); return; }
+  if(!t.trim()){ say("nothing written yet"); return; }
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(t);
-  u.lang = "pt-BR"; u.rate = cfg.rate;
+  u.lang = "en-US"; u.rate = cfg.rate;
   const v = pickVoice(); if(v) u.voice = v;
   speechSynthesis.speak(u);
 }
@@ -928,9 +950,9 @@ addEventListener("resize", fit);
    9. FRASES PRONTAS
    ================================================================ */
 const DEF_PHR = [
-  "Estou com dor.", "Preciso ir ao banheiro.", "Estou com sede.", "Pode me ajudar, por favor?",
-  "Quero mudar de posição.", "Chame a enfermeira, por favor.", "Espere um pouco, estou escrevendo.",
-  "Sim.", "Não.", "Obrigado!", "Estou bem, obrigado.", "Vamos marcar uma conversa?"
+  "I am in pain.", "I need the bathroom.", "I am thirsty.", "Can you help me, please?",
+  "I want to change position.", "Call the nurse, please.", "Wait a moment, I am typing.",
+  "Yes.", "No.", "Thank you!", "I am fine, thanks.", "Can we schedule a talk?"
 ];
 let PHR = load(K.phr, null) || DEF_PHR.slice();
 let phrRemoveMode = false;
@@ -944,7 +966,7 @@ function renderPhrases(){
     b.innerHTML = '<span class="fill"></span>' + (phrRemoveMode ? "🗑 " : "") + f;
     bind(b, () => {
       if(phrRemoveMode){
-        PHR.splice(i,1); save(K.phr, PHR); phrRemoveMode = false; renderPhrases(); say("frase removida");
+        PHR.splice(i,1); save(K.phr, PHR); phrRemoveMode = false; renderPhrases(); say("phrase removed");
       }else{
         pushUndo();
         text = (text && !/\s$/.test(text) ? text + " " : text) + f + " ";
@@ -965,24 +987,24 @@ addEventListener("keydown", e => { if(e.key === "Escape") closeModals(); });
 
 function syncCfgUI(){
   const set = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
-  set("cfgDwell", cfg.dwell ? "ligada" : "desligada");
+  set("cfgDwell", cfg.dwell ? "on" : "off");
   set("dwellVal", (cfg.dwellMs/1000).toFixed(1) + "s");
   set("szVal", Math.round(cfg.scale*100) + "%");
   set("fsVal", Math.round(cfg.fs*100) + "%");
-  set("cfgOrder", cfg.order === "alpha" ? "alfabética" : "por probabilidade");
-  set("cfgN", cfg.innerN ? cfg.innerN + " letras" : "automático");
-  set("cfgOuter", cfg.outer ? "sim" : "não");
-  set("cfgHC", cfg.hc ? "ligado" : "desligado");
-  set("cfgAuto", cfg.autoSpeak ? "sim" : "não");
+  set("cfgOrder", cfg.order === "alpha" ? "alphabetical" : "by probability");
+  set("cfgN", cfg.innerN ? cfg.innerN + " letters" : "automatic");
+  set("cfgOuter", cfg.outer ? "yes" : "no");
+  set("cfgHC", cfg.hc ? "on" : "off");
+  set("cfgAuto", cfg.autoSpeak ? "yes" : "no");
   set("rateVal", cfg.rate.toFixed(2) + "x");
   const v = pickVoice();
-  set("cfgVoice", v ? v.name.slice(0,26) : "padrão do sistema");
+  set("cfgVoice", v ? v.name.slice(0,26) : "system default");
   document.getElementById("cfgDwell").classList.toggle("on", cfg.dwell);
   document.getElementById("cfgHC").classList.toggle("on", cfg.hc);
   document.body.classList.toggle("hc", cfg.hc);
   const stats = document.getElementById("learnStats");
-  if(stats) stats.textContent = Object.keys(LEARN).length + " palavras suas aprendidas · " +
-    Object.keys(NEXT).length + " encadeamentos · " + ALL.length + " palavras no dicionário";
+  if(stats) stats.textContent = Object.keys(LEARN).length + " of your words learned · " +
+    Object.keys(NEXT).length + " chains · " + ALL.length + " words in the dictionary";
 }
 function setCfg(patch){ Object.assign(cfg, patch); save(K.cfg, cfg); syncCfgUI(); fit(); render(); }
 
@@ -994,14 +1016,14 @@ B("talkClose", () => document.getElementById("talkOverlay").classList.remove("on
 B("btnPhrases",() => { renderPhrases(); openModal("mPhrases"); });
 B("btnCfg",    () => { syncCfgUI(); openModal("mCfg"); });
 B("btnLearn",  () => { syncCfgUI(); openModal("mLearn"); });
-B("btnClear",  () => { pushUndo(); text = ""; caret = 0; page = 0; render(); say("texto apagado — dá para desfazer na roda"); });
+B("btnClear",  () => { pushUndo(); text = ""; caret = 0; page = 0; render(); say("text cleared — undo is on the wheel"); });
 B("btnPrev",   () => moveWord(-1));
 B("btnNext",   () => moveWord(1));
 B("btnFix",    () => {
   fixMode = !fixMode;
   document.body.classList.toggle("fix", fixMode);
   document.getElementById("btnFix").classList.toggle("ativo", fixMode);
-  say(fixMode ? "toque na palavra onde quer continuar escrevendo" : "");
+  say(fixMode ? "tap the word where you want to continue writing" : "");
   render();
 });
 B("btnMode",   () => { mode = (mode === "abc") ? "sym" : "abc";
@@ -1009,8 +1031,8 @@ B("btnMode",   () => { mode = (mode === "abc") ? "sym" : "abc";
                        page = 0; render(); });
 B("btnPause",  () => { paused = !paused;
                        document.body.classList.toggle("paused", paused);
-                       document.getElementById("btnPause").lastChild.textContent = paused ? "▶ Retomar" : "⏸ Pausar";
-                       say(paused ? "teclado pausado — pode olhar a tela à vontade" : "teclado ativo"); });
+                       document.getElementById("btnPause").lastChild.textContent = paused ? "▶ Resume" : "⏸ Pause";
+                       say(paused ? "keyboard paused — look around freely" : "keyboard active"); });
 
 B("cfgDwell", () => setCfg({dwell: !cfg.dwell}));
 B("dwellDown",() => setCfg({dwellMs: Math.max(400, cfg.dwellMs - 100)}));
@@ -1027,28 +1049,28 @@ B("cfgAuto",  () => setCfg({autoSpeak: !cfg.autoSpeak}));
 B("rateDown", () => setCfg({rate: Math.max(0.5, +(cfg.rate - 0.05).toFixed(2))}));
 B("rateUp",   () => setCfg({rate: Math.min(1.6, +(cfg.rate + 0.05).toFixed(2))}));
 B("cfgVoice", () => {
-  const pt = voices.filter(v => /^pt/i.test(v.lang));
-  if(!pt.length){ say("nenhuma voz em português instalada"); return; }
-  const cur = pt.findIndex(v => v.name === cfg.voice);
-  setCfg({voice: pt[(cur + 1) % pt.length].name});
-  speak("Assim que eu vou falar.");
+  const en = voices.filter(v => /^en/i.test(v.lang));
+  if(!en.length){ say("no English voice installed"); return; }
+  const cur = en.findIndex(v => v.name === cfg.voice);
+  setCfg({voice: en[(cur + 1) % en.length].name});
+  speak("This is how I will sound.");
 });
 
 B("phSave", () => {
   const t = text.trim();
-  if(!t){ say("escreva alguma coisa primeiro"); return; }
-  PHR.unshift(t); save(K.phr, PHR); renderPhrases(); say("frase salva");
+  if(!t){ say("write something first"); return; }
+  PHR.unshift(t); save(K.phr, PHR); renderPhrases(); say("phrase saved");
 });
-B("phDel", () => { phrRemoveMode = !phrRemoveMode; renderPhrases(); say(phrRemoveMode ? "toque na frase que quer remover" : ""); });
+B("phDel", () => { phrRemoveMode = !phrRemoveMode; renderPhrases(); say(phrRemoveMode ? "tap the phrase you want to remove" : ""); });
 
 /* --- ensinar com texto --- */
 function learnFromText(t){
-  const toks = t.toLowerCase().split(/[^a-záéíóúâêôãõàçüñ]+/).filter(okWord);
+  const toks = t.toLowerCase().split(/[^a-z']+/).filter(okWord);
   let novas = 0, pares = 0, prev = "«início»";
   const sentences = t.toLowerCase().split(/[.!?…\n]+/);
   for(const s of sentences){
     prev = "«início»";
-    for(const w of s.split(/[^a-záéíóúâêôãõàçüñ]+/).filter(okWord)){
+    for(const w of s.split(/[^a-z']+/).filter(okWord)){
       if(!LEARN[w]) novas++;
       learnWord(w); learnPair(prev, w); pares++; prev = w;
     }
@@ -1059,7 +1081,7 @@ B("learnGo", () => {
   const t = document.getElementById("learnTxt").value || "";
   const r = learnFromText(t);
   rebuild(); syncCfgUI(); render();
-  say("aprendi " + r.toks + " palavras (" + r.novas + " novas) e " + r.pares + " encadeamentos", 6000);
+  say("learned " + r.toks + " words (" + r.novas + " new) and " + r.pares + " chains", 6000);
 });
 B("learnFiles", () => {
   const inp = document.createElement("input");
@@ -1071,9 +1093,9 @@ B("learnFiles", () => {
     const finish = () => {
       if(++done < files.length) return;
       rebuild(); syncCfgUI(); render();
-      let msg = "li " + files.length + " arquivo" + (files.length > 1 ? "s" : "") + ": " +
-        toks + " palavras (" + novas + " novas), " + pares + " encadeamentos";
-      if(backups) msg += " e " + backups + " backup" + (backups > 1 ? "s" : "") + " mesclado" + (backups > 1 ? "s" : "");
+      let msg = "read " + files.length + " file" + (files.length > 1 ? "s" : "") + ": " +
+        toks + " words (" + novas + " new), " + pares + " chains";
+      if(backups) msg += " and " + backups + " backup" + (backups > 1 ? "s" : "") + " merged";
       say(msg, 8000);
     };
     for(const f of files){
@@ -1117,9 +1139,9 @@ B("learnExp", () => {
   const blob = new Blob([JSON.stringify({learn:LEARN, next:NEXT, phr:PHR, cfg:cfg}, null, 1)], {type:"application/json"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "teclado-redondo-aprendizado.json";
+  a.download = "gazewheel-learning.json";
   a.click();
-  say("arquivo de backup gerado — guarde em lugar seguro", 6000);
+  say("backup file created — keep it somewhere safe", 6000);
 });
 B("learnImp", () => {
   const inp = document.createElement("input");
@@ -1135,8 +1157,8 @@ B("learnImp", () => {
         if(d.phr) PHR = d.phr;
         for(const w in LEARN){ if(typeof LEARN[w] === "number") LEARN[w] = {n:LEARN[w], d:today(), pin:0}; }
         save(K.learn, LEARN); save(K.next, NEXT); save(K.phr, PHR);
-        rebuild(); syncCfgUI(); render(); say("aprendizado restaurado", 5000);
-      }catch(e){ say("arquivo inválido"); }
+        rebuild(); syncCfgUI(); render(); say("learning restored", 5000);
+      }catch(e){ say("invalid file"); }
     };
     r.readAsText(f);
   };
