@@ -4,22 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GazeWheel — a round keyboard for cursor typing</title>
-<meta name="description" content="GazeWheel is a free round on-screen keyboard for people who cannot speak and type with the cursor instead of their hands — eye tracker, trackball, head mouse or one finger. Word prediction in Portuguese, built-in voice, learning, no install.">
+<meta name="description" content="GazeWheel is a free round on-screen keyboard for people who cannot speak and type with the cursor instead of their hands — eye tracker, trackball, head mouse or one finger. Word prediction, built-in voice, learning, no install.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%2326324c' stroke-width='9'/%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%234da3ff' stroke-width='9' stroke-dasharray='66 223' stroke-dashoffset='-140' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='50' r='29' fill='none' stroke='%232c3a5c' stroke-width='8'/%3E%3Ccircle cx='50' cy='50' r='12' fill='%234da3ff'/%3E%3Cpath d='M56 48 v30 l8-7 4.8 10.6 6.2-2.8 -4.8-10.6 11-1 z' fill='%23fff' stroke='%230f1420' stroke-width='3'/%3E%3C/svg%3E">
 <style>
   :root{--bg:#0f1420;--panel:#1a2233;--panel2:#232e46;--text:#f2f6ff;--dim:#8fa0bf;--accent:#4da3ff;--green:#59c96b;--amber:#ffd166;}
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,Arial,sans-serif;line-height:1.55;}
   .wrap{max-width:880px;margin:0 auto;padding:44px 22px 70px;}
-  header{text-align:center;margin-bottom:38px;}
+  header{text-align:center;margin-bottom:34px;}
   .mark{width:112px;height:112px;margin:0 auto 14px;display:block;}
   .brand{font-size:26px;font-weight:800;letter-spacing:.5px;margin-bottom:2px;}
   .brand .gaze{color:var(--accent);}
   .slogan{color:var(--amber);font-size:17px;font-style:italic;letter-spacing:.3px;margin-bottom:22px;}
   h1{font-size:38px;letter-spacing:-.6px;margin-bottom:14px;line-height:1.18;}
-  .sub{color:var(--dim);font-size:20px;max-width:640px;margin:0 auto;}
-  .cards{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:34px 0 44px;}
-  @media(max-width:720px){.cards{grid-template-columns:1fr;} h1{font-size:29px;} .sub{font-size:18px;}}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:30px 0 10px;}
+  @media(max-width:720px){.cards{grid-template-columns:1fr;} h1{font-size:29px;} .statement{font-size:22px;}}
   a.card{display:block;background:var(--panel);border:2px solid #2a3550;border-radius:18px;
     padding:26px 24px;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s;}
   a.card:hover{border-color:var(--accent);transform:translateY(-2px);}
@@ -29,15 +28,31 @@
   a.card h2{font-size:25px;margin-bottom:8px;}
   a.card p{color:var(--dim);font-size:17px;}
   a.card .go{display:block;margin-top:16px;color:var(--accent);font-weight:700;font-size:17px;}
-  section{margin-bottom:36px;}
+  section{margin-bottom:40px;}
   h3{font-size:22px;margin-bottom:10px;}
   p{margin-bottom:13px;font-size:17.5px;}
+  .statement{text-align:center;padding:44px 10px 34px;font-size:27px;line-height:1.4;font-weight:600;max-width:720px;margin:0 auto;}
+  .statement .hi{color:var(--accent);}
+  .statement small{display:block;margin-top:14px;font-size:18px;font-weight:400;color:var(--dim);}
+  .share{background:var(--panel);border:2px solid #2a3550;border-radius:18px;padding:30px 26px;text-align:center;}
+  .share h3{font-size:24px;}
+  .share p{color:#cddaf0;max-width:620px;margin:0 auto 18px;}
+  .btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+  .btn{display:inline-block;padding:13px 22px;border-radius:12px;font-size:17px;font-weight:700;text-decoration:none;cursor:pointer;border:0;font-family:inherit;}
+  .btn.wa{background:var(--green);color:#0f1420;}
+  .btn.cp{background:var(--panel2);color:var(--text);}
+  .btn:hover{filter:brightness(1.1);}
   ul.feat{list-style:none;margin:0 0 13px;}
   ul.feat li{position:relative;padding-left:26px;margin-bottom:10px;font-size:17.5px;}
   ul.feat li::before{content:"";position:absolute;left:0;top:9px;width:10px;height:10px;border-radius:50%;background:var(--accent);}
   .note{background:var(--panel);border-left:4px solid var(--accent);border-radius:0 12px 12px 0;padding:16px 20px;color:#cddaf0;font-size:16.5px;}
   .shot{display:block;width:100%;max-width:640px;margin:18px auto 6px;border-radius:14px;border:1px solid #2a3550;}
-  .caption{text-align:center;color:var(--dim);font-size:15px;margin-bottom:0;}
+  .photo{display:block;width:100%;max-width:760px;margin:0 auto 6px;border-radius:14px;border:1px solid #2a3550;}
+  .caption{text-align:center;color:var(--dim);font-size:14.5px;margin-bottom:0;}
+  .donate{background:linear-gradient(160deg,#1a2233,#232e46);border:2px solid #2a3550;border-radius:18px;padding:30px 26px;text-align:center;}
+  .donate h3{font-size:24px;}
+  .donate p{color:#cddaf0;max-width:640px;margin:0 auto 16px;}
+  .donate a.btn{background:var(--amber);color:#0f1420;}
   footer{border-top:1px solid #2a3550;padding-top:22px;color:var(--dim);font-size:15px;text-align:center;}
   .fs-link{display:inline-flex;align-items:center;gap:12px;margin-top:18px;text-decoration:none;color:inherit;}
   .fs-stack{display:flex;flex-direction:column;align-items:center;gap:2px;}
@@ -54,6 +69,7 @@
 <body>
 <div class="wrap">
 
+  <!-- SCREEN 1: brand + use it -->
   <header>
     <svg class="mark" viewBox="0 0 100 100" aria-hidden="true">
       <circle cx="50" cy="50" r="46" fill="none" stroke="#26324c" stroke-width="9"/>
@@ -72,25 +88,48 @@
     <div class="brand"><span class="gaze">Gaze</span>Wheel</div>
     <p class="slogan">Gazetyping is easier.</p>
     <h1>A round keyboard for people<br>who type with the cursor</h1>
-    <p class="sub">For those who cannot speak and cannot use their hands. Type with your eyes, a finger,
-    your head or a trackball. Free, runs in the browser, nothing to install.</p>
+
+    <div class="cards">
+      <a class="card fixa" href="estavel.html">
+        <span class="tag">stable</span>
+        <h2>Use it now</h2>
+        <p>The stable version. This is the one for daily use.</p>
+        <span class="go">Open →</span>
+      </a>
+      <a class="card teste" href="teste.html">
+        <span class="tag">testing</span>
+        <h2>Try the new version</h2>
+        <p>Auto-speak, attention chime, conversation mode, mid-text correction, learning.</p>
+        <span class="go">Try it →</span>
+      </a>
+    </div>
   </header>
 
-  <div class="cards">
-    <a class="card fixa" href="estavel.html">
-      <span class="tag">stable</span>
-      <h2>Use it now</h2>
-      <p>The stable version. This is the one for daily use.</p>
-      <span class="go">Open →</span>
-    </a>
-    <a class="card teste" href="teste.html">
-      <span class="tag">testing</span>
-      <h2>Try the new version</h2>
-      <p>Auto-speak on sentence end, attention chime, conversation mode, mid-text correction,
-      learning from your own texts.</p>
-      <span class="go">Try it →</span>
-    </a>
-  </div>
+  <!-- SCREEN 2: who this is for, front and center -->
+  <section class="statement">
+    For those who <span class="hi">cannot speak</span> and <span class="hi">cannot use their hands</span>.
+    Type with your eyes, a finger, your head or a trackball.
+    <small>Free. Runs in the browser. Nothing to install.</small>
+  </section>
+
+  <!-- SCREEN 3: share -->
+  <section class="share">
+    <h3>Know someone who needs this?</h3>
+    <p>Losing speech doesn't have to mean losing conversation, study or work. GazeWheel cuts the time
+    and effort it takes to say something — enough speed to argue, joke and get things done, not just
+    ask for water. Send it to the person, a caregiver or a therapist. It costs nothing.</p>
+    <div class="btns">
+      <a class="btn wa" href="https://wa.me/?text=GazeWheel%20%E2%80%94%20a%20free%20round%20keyboard%20for%20people%20who%20cannot%20speak%20and%20type%20with%20the%20cursor%20(eye%20tracker%2C%20trackball%2C%20one%20finger).%20https%3A%2F%2Fwww.gazewheel.org">Share on WhatsApp</a>
+      <button class="btn cp" id="copyBtn">Copy the link</button>
+    </div>
+  </section>
+
+  <!-- photo -->
+  <section>
+    <img class="photo" src="assets/eye-gaze-user.jpg" alt="Per Villand, reclined at home with a ventilator, in front of a computer he controlled with his eyes" width="980" height="550" loading="lazy">
+    <p class="caption">Per Villand lived with ALS and communicated through a computer controlled by his eye
+    movements. Photo: Sigmund Krøvel-Velle / Hallingdølen, <a href="https://commons.wikimedia.org/wiki/File:Per_Villand.jpg" style="color:inherit">CC BY-SA 4.0</a>.</p>
+  </section>
 
   <section>
     <h3>Why round?</h3>
@@ -104,19 +143,18 @@
   </section>
 
   <section>
-    <h3>What it does</h3>
+    <h3>Less time and effort, sentence after sentence</h3>
     <ul class="feat">
-      <li><b>Word prediction that learns.</b> Suggestions adapt to your vocabulary and your word chains.
-      Accepting a word usually costs one selection instead of five or six. You can also feed it your own
-      texts and export a backup.</li>
-      <li><b>It speaks for you.</b> End a sentence with a period and it is spoken out loud automatically.
-      An attention chime says "wait, I'm typing" so the other person doesn't walk away.</li>
-      <li><b>Conversation mode.</b> Your text goes full-screen, large, facing the person you are talking to.</li>
-      <li><b>A real cursor.</b> Move word by word through what you wrote and fix a word in the middle
-      without erasing everything after it. Long texts stay editable.</li>
-      <li><b>Saved phrases</b> for the things you say every day.</li>
-      <li><b>Rest zone and auto-pause.</b> After each selection there is a short pause, so a parked cursor
-      never fires twice.</li>
+      <li><b>Prediction that learns you.</b> Suggestions adapt to your vocabulary and habits. One selection
+      often replaces five or six keystrokes. Feed it your own texts; export a backup anytime.</li>
+      <li><b>Your voice, automatic.</b> Close a sentence with a period and it is spoken aloud on the spot.
+      A chime tells the other person "wait, I'm typing" so they stay in the conversation.</li>
+      <li><b>Conversation mode.</b> Your words go full-screen, large, facing the person in front of you.</li>
+      <li><b>Edit without starting over.</b> Walk the cursor word by word and fix a mistake in the middle
+      of a paragraph — nothing after it is lost.</li>
+      <li><b>Everyday phrases, ready.</b> The things you say all the time, one selection away.</li>
+      <li><b>Built for imprecise pointing.</b> A rest zone in the center and an automatic pause after each
+      selection, so a parked cursor never fires twice.</li>
     </ul>
   </section>
 
@@ -126,7 +164,7 @@
     pointer, turn on dwell selection and set the dwell time. If it already clicks by itself (like Tobii
     Windows Control), keep dwell off so there are no two timers stacked. Wheel size, text size, letter
     order, contrast, voice and speed are all adjustable:</p>
-    <img class="shot" src="assets/settings.png" alt="GazeWheel settings screen: dwell selection, dwell time, wheel size, text size, letter order, contrast, auto-speak, voice and speed" width="1000" height="1100">
+    <img class="shot" src="assets/settings.png" alt="GazeWheel settings screen: dwell selection, dwell time, wheel size, text size, letter order, contrast, auto-speak, voice and speed" width="1000" height="1100" loading="lazy">
     <p class="caption">The settings screen (interface currently in Portuguese).</p>
   </section>
 
@@ -146,6 +184,14 @@
     server.</p>
   </section>
 
+  <!-- donors -->
+  <section class="donate">
+    <h3>Liked the idea?</h3>
+    <p>GazeWheel is a Free School project. Donations fund early childhood education — scholarships —
+    and more projects like this one.</p>
+    <a class="btn" href="mailto:contato@freeschool.com.br?subject=Donation%20%2F%20Doa%C3%A7%C3%A3o%20%E2%80%94%20Free%20School">Talk to us about donating</a>
+  </section>
+
   <footer>
     Open project. Made to be copied, adapted and improved.
     <br>
@@ -156,5 +202,13 @@
   </footer>
 
 </div>
+<script>
+document.getElementById("copyBtn").addEventListener("click", function(){
+  navigator.clipboard.writeText("https://www.gazewheel.org").then(() => {
+    this.textContent = "Link copied ✓";
+    setTimeout(() => { this.textContent = "Copy the link"; }, 2000);
+  });
+});
+</script>
 </body>
 </html>
