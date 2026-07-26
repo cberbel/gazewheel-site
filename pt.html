@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GazeWheel — teclado redondo (controle por olhar)</title>
+<style>
+  :root{
+    --bg:#0f1420;
+    --panel:#1a2233;
+    --panel2:#232e46;
+    --text:#f2f6ff;
+    --dim:#8fa0bf;
+    --accent:#4da3ff;
+    --green:#59c96b;
+    --amber:#ffd166;
+    --red:#ff7b7b;
+    --wedge:#26324c;
+    --wedge2:#1d2740;
+    --hub:#2c3a5c;
+    --rest:#151c2c;
+  }
+  /* paletas — mesma lógica do logo: um acento forte + um secundário */
+  body[data-theme="red"]   { --accent:#ff6b6b; --green:#ffa96b; }
+  body[data-theme="green"] { --accent:#5ad48a; --green:#7fd8ff; }
+  body[data-theme="purple"]{ --accent:#b18cff; --green:#6bd6ff; }
+  body[data-theme="amber"] { --accent:#ffc247; --green:#ff9f6b; }
+  body.hc{
+    --bg:#000; --panel:#0a0a0a; --panel2:#141414; --text:#fff; --dim:#c8c8c8;
+    --wedge:#333; --wedge2:#1c1c1c; --hub:#3a3a3a; --rest:#000; --accent:#ffe600; --green:#00e676;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:"Segoe UI", Roboto, Arial, sans-serif;
+    display:flex; flex-direction:column; overflow:hidden; user-select:none;
+  }
+  body.locked #wheel{opacity:.45;}
+  body.paused #stage{opacity:.35;}
+  #app{flex:1; display:flex; gap:10px; padding:8px 10px 10px; min-height:0;}
+
+  /* ---------- palco: texto + sugestões + roda ---------- */
+  #stage{flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0; transition:opacity .2s;}
+  #tail{
+    min-height:56px; max-width:100%; display:flex; align-items:center; justify-content:flex-end;
+    overflow:hidden; font-size:calc(38px * var(--fs,1)); font-weight:700; white-space:pre; letter-spacing:.5px;
+  }
+  #tail .prev{color:#b7c5e0; font-weight:600;}
+  #tail .cur{color:var(--amber);}
+  #tail .caret{display:inline-block; width:5px; height:.95em; margin-left:3px; background:var(--accent); animation:blink 1.1s step-end infinite;}
+  #tail.empty::before{content:"escreva…"; color:#3d4a66; font-weight:600;}
+  @keyframes blink{50%{opacity:0;}}
+
+  #sugRow{display:flex; gap:14px; min-height:66px; align-items:center; justify-content:center; flex-wrap:nowrap;}
+  #wheelWrap{flex:0 0 auto; display:flex; align-items:center; justify-content:center;}
+  svg{display:block;}
+
+  /* ---------- alvos SVG ---------- */
+  .wedge{fill:var(--wedge); stroke:var(--bg); stroke-width:5; cursor:pointer;}
+  .outer .wedge{fill:var(--wedge2);}
+  .wedge:hover{fill:#3a5583;}
+  .wedge.dwelling{fill:var(--accent);}
+  .wedge.flash{fill:var(--accent);}
+  .quad{fill:var(--hub); stroke:var(--bg); stroke-width:5; cursor:pointer;}
+  .quad:hover{fill:#3d5080;}
+  .quad.dwelling,.quad.flash{fill:var(--accent);}
+  .quad.danger{fill:#4a2b38;}
+  .quad.danger:hover{fill:#6d3a4c;}
+  .lbl{fill:var(--text); text-anchor:middle; dominant-baseline:central; pointer-events:none; font-weight:700;}
+  .outerLbl{fill:#c9d6ee; font-weight:600;}
+  .sub{fill:#cfd9ee; font-weight:600; opacity:.85;}
+  /* o centro repete o miolo do logo: anel de acento em volta da zona de descanso */
+  #restZone{fill:var(--rest); stroke:var(--accent); stroke-opacity:.5; stroke-width:4; pointer-events:none;}
+  #restDot{fill:var(--accent); opacity:.16; pointer-events:none;}
+  .pageArc{fill:none; stroke:var(--accent); stroke-width:9; stroke-linecap:round; pointer-events:none; opacity:.85;}
+  .restTxt{fill:#46557a; text-anchor:middle; dominant-baseline:central; pointer-events:none; font-weight:700;}
+
+  /* ---------- botões HTML ---------- */
+  .tgt{position:relative; overflow:hidden; border:none; cursor:pointer; color:var(--text); font-family:inherit;}
+  .tgt .fill{position:absolute; left:0; top:0; bottom:0; width:0; background:rgba(77,163,255,.38); pointer-events:none;}
+  .tgt.dwelling .fill{width:100%;}
+  .tgt.flash{background:var(--accent) !important; color:#0f1420 !important;}
+
+  .word{
+    background:var(--panel2); border:3px solid transparent; border-radius:999px; color:var(--green);
+    font-size:calc(30px * var(--fs,1)); font-weight:600; padding:12px 26px; white-space:nowrap; min-height:62px;
+  }
+  .word:hover{border-color:var(--green); background:#2a3a56;}
+  .word b{color:var(--text); font-weight:700;}
+  .word .fill{background:rgba(89,201,107,.30);}
+
+  /* ---------- lado direito ---------- */
+  #side{flex:0 0 clamp(240px, 30%, 460px); display:flex; flex-direction:column; gap:8px;}
+  #out{
+    background:var(--panel); border-radius:14px; padding:14px 18px;
+    font-size:calc(27px * var(--fs,1)); line-height:1.35; flex:1; overflow-y:auto; word-wrap:break-word;
+  }
+  #out .caret{display:inline-block; width:3px; height:1em; background:var(--accent); vertical-align:text-bottom; animation:blink 1.1s step-end infinite;}
+  #navRow{display:grid; grid-template-columns:66px 1fr 66px; gap:8px;}
+  #btnFix.ativo{background:var(--accent); color:#0f1420;}
+  /* modo corrigir: as palavras do texto viram alvos para reposicionar o cursor */
+  body.fix #out{border:2px solid var(--accent);}
+  body.fix #out .w{cursor:pointer; border-radius:6px; padding:0 2px; background:rgba(77,163,255,.10);}
+  body.fix #out .w:hover{background:var(--accent); color:#0f1420;}
+  #btns{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  button.ctrl{background:var(--panel2); border-radius:12px; font-size:18px; font-weight:600; height:52px; padding:0 6px;}
+  button.ctrl:hover{background:#33436a;}
+  button.ctrl.wide{grid-column:1 / -1;}
+  button.ctrl.big{height:70px; font-size:24px; background:#1f3352; color:var(--amber); border:2px solid #35507d;}
+  button.ctrl.big:hover{background:#2a4370;}
+  button.ctrl.att{height:60px; font-size:19px; background:#3a2f18; color:var(--amber);}
+  button.ctrl.att:hover{background:#50401f;}
+  /* modo conversa: texto grande virado para o interlocutor ler */
+  #talkOverlay{position:fixed; inset:0; background:#0b0f18; display:none; flex-direction:column; z-index:60; padding:26px;}
+  #talkOverlay.on{display:flex;}
+  #talkText{flex:1; display:flex; align-items:center; justify-content:center; text-align:center;
+            font-size:min(8.5vw,86px); font-weight:700; line-height:1.25; overflow:auto; padding:10px;}
+  #talkText.vazio{color:#3d4a66; font-size:34px; font-weight:600;}
+  #talkOverlay .close{max-width:440px; margin:0 auto;}
+  #btnSpeak{color:var(--amber);} #btnClear{color:var(--red);} #btnPause{color:var(--accent);}
+  #status{font-size:15px; color:var(--dim); min-height:20px; text-align:center;}
+
+  /* ---------- janelas ---------- */
+  .modal{position:fixed; inset:0; background:rgba(6,9,16,.88); display:none; align-items:center; justify-content:center; padding:20px; z-index:50;}
+  .modal.on{display:flex;}
+  .box{background:var(--panel); border-radius:18px; padding:20px; width:min(900px,96vw); max-height:92vh; overflow:auto;}
+  .box h2{font-size:23px; margin-bottom:6px;}
+  .box p.hint{color:var(--dim); font-size:15px; margin-bottom:14px; line-height:1.45;}
+  .row{display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid #2a3550; flex-wrap:wrap;}
+  .row:last-child{border-bottom:none;}
+  .row label{font-size:18px; flex:1; min-width:190px;}
+  .row .val{color:var(--accent); font-weight:700; min-width:78px; text-align:right; font-size:18px;}
+  .mini{background:var(--panel2); border-radius:10px; height:46px; min-width:56px; font-size:19px; font-weight:700; padding:0 14px;}
+  .mini:hover{background:#33436a;}
+  .mini.on{background:var(--accent); color:#0f1420;}
+  #topWords{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 4px;}
+  #topWords span{background:var(--panel2); border-radius:999px; padding:6px 14px; font-size:16px; color:#cddaf0;}
+  #topWords span b{color:var(--accent); font-weight:700; margin-left:6px; font-size:14px;}
+  #phraseGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:10px; margin-bottom:14px;}
+  .phrase{background:var(--panel2); border-radius:14px; padding:16px 18px; font-size:20px; text-align:left; min-height:66px; line-height:1.3;}
+  .phrase:hover{background:#33436a;}
+  textarea{width:100%; height:190px; background:var(--panel2); color:var(--text); border:2px solid #2f3c5c; border-radius:12px; padding:12px; font-size:17px; font-family:inherit; resize:vertical;}
+  .modal .close{margin-top:16px; width:100%; height:60px; border-radius:12px; background:var(--panel2); font-size:20px; font-weight:700;}
+  .modal .close:hover{background:#33436a;}
+  .tagline{color:var(--dim); font-size:13px; text-align:center; padding:2px 0 0;}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <section id="stage">
+    <div id="tail"></div>
+    <div id="sugRow"></div>
+    <div id="wheelWrap"><svg id="wheel" viewBox="0 0 850 850" aria-label="teclado circular"></svg></div>
+  </section>
+
+  <aside id="side">
+    <div id="out" aria-live="polite"></div>
+    <div id="navRow">
+      <button class="ctrl tgt" id="btnPrev"><span class="fill"></span>◀</button>
+      <button class="ctrl tgt" id="btnFix"><span class="fill"></span>✎ Corrigir</button>
+      <button class="ctrl tgt" id="btnNext"><span class="fill"></span>▶</button>
+    </div>
+    <div id="btns">
+      <button class="ctrl tgt wide big" id="btnSpeak"><span class="fill"></span>🔊 Falar</button>
+      <button class="ctrl tgt wide att" id="btnAtt"><span class="fill"></span>✋ Espera, estou escrevendo</button>
+      <button class="ctrl tgt" id="btnPhrases"><span class="fill"></span>💬 Frases</button>
+      <button class="ctrl tgt" id="btnTalk"><span class="fill"></span>👁 Conversa</button>
+      <button class="ctrl tgt" id="btnMode"><span class="fill"></span>123 / ?!</button>
+      <button class="ctrl tgt" id="btnPause"><span class="fill"></span>⏸ Pausar</button>
+      <button class="ctrl tgt" id="btnCfg"><span class="fill"></span>⚙ Ajustes</button>
+      <button class="ctrl tgt" id="btnLearn"><span class="fill"></span>🧠 Ensinar</button>
+      <button class="ctrl tgt wide" id="btnClear"><span class="fill"></span>🗑 Limpar</button>
+    </div>
+    <div id="status"></div>
+    <div class="tagline">versão em teste · seu texto e seu vocabulário ficam salvos só neste computador</div>
+  </aside>
+</div>
+
+<!-- ============ MODO CONVERSA ============ -->
+<div id="talkOverlay">
+  <div id="talkText"></div>
+  <button class="close tgt" id="talkClose"><span class="fill"></span>Voltar a escrever</button>
+</div>
+
+<!-- ============ FRASES ============ -->
+<div class="modal" id="mPhrases"><div class="box">
+  <h2>Frases prontas</h2>
+  <p class="hint">Uma seleção só, em vez de escrever tudo. Toque numa frase para inserir no texto.</p>
+  <div id="phraseGrid"></div>
+  <div class="row">
+    <button class="mini tgt" id="phSave"><span class="fill"></span>+ Salvar o texto atual como frase</button>
+    <button class="mini tgt" id="phDel"><span class="fill"></span>🗑 Remover uma frase</button>
+  </div>
+  <button class="close tgt" data-close><span class="fill"></span>Fechar</button>
+</div></div>
+
+<!-- ============ ENSINAR ============ -->
+<div class="modal" id="mLearn"><div class="box">
+  <h2>Ensinar o teclado a escrever como você</h2>
+  <p class="hint">Cole aqui textos que você mesmo escreveu — reportagens, e-mails, posts — ou carregue arquivos de texto
+  de uma vez (útil para quem já usa outro autocomplete calibrado: exporte seus textos de lá e traga tudo aqui).
+  O teclado aprende suas palavras e, principalmente, <b>quais palavras você costuma usar depois de quais</b>. É o jeito
+  mais rápido de reduzir o número de seleções por frase. Nada é enviado para a internet: fica salvo só neste navegador.</p>
+  <textarea id="learnTxt" placeholder="Cole aqui um texto seu…"></textarea>
+  <div class="row">
+    <button class="mini tgt" id="learnGo"><span class="fill"></span>Aprender com este texto</button>
+    <button class="mini tgt" id="learnFiles"><span class="fill"></span>📄 Aprender com arquivos</button>
+  </div>
+  <div class="row">
+    <button class="mini tgt" id="learnExp"><span class="fill"></span>⬇ Exportar aprendizado</button>
+    <button class="mini tgt" id="learnImp"><span class="fill"></span>⬆ Importar aprendizado</button>
+  </div>
+  <div class="row"><label id="learnStats"></label></div>
+  <div class="row" style="display:block"><label>Suas palavras mais usadas</label>
+    <div id="topWords"></div></div>
+  <button class="close tgt" data-close><span class="fill"></span>Fechar</button>
+</div></div>
+
+<!-- ============ AJUSTES ============ -->
+<div class="modal" id="mCfg"><div class="box">
+  <h2>Ajustes</h2>
+  <p class="hint">Pensado para quem controla o cursor com os olhos. Se o seu equipamento já faz o clique sozinho
+  (Tobii Windows Control, por exemplo), deixe a seleção por permanência <b>desligada</b> para não haver dois tempos de espera.</p>
+
+  <div class="row"><label>Selecionar parando o cursor (dwell)</label>
+    <button class="mini tgt" id="cfgDwell"><span class="fill"></span>—</button></div>
+  <div class="row"><label>Tempo de permanência</label>
+    <button class="mini tgt" id="dwellDown"><span class="fill"></span>−</button>
+    <span class="val" id="dwellVal"></span>
+    <button class="mini tgt" id="dwellUp"><span class="fill"></span>+</button></div>
+  <div class="row"><label>Tamanho da roda</label>
+    <button class="mini tgt" id="szDown"><span class="fill"></span>−</button>
+    <span class="val" id="szVal"></span>
+    <button class="mini tgt" id="szUp"><span class="fill"></span>+</button></div>
+  <div class="row"><label>Tamanho do texto</label>
+    <button class="mini tgt" id="fsDown"><span class="fill"></span>−</button>
+    <span class="val" id="fsVal"></span>
+    <button class="mini tgt" id="fsUp"><span class="fill"></span>+</button></div>
+  <div class="row"><label>Ordem das letras do anel interno</label>
+    <button class="mini tgt" id="cfgOrder"><span class="fill"></span>—</button></div>
+  <div class="row"><label>Quantas letras no anel interno</label>
+    <button class="mini tgt" id="cfgN"><span class="fill"></span>—</button></div>
+  <div class="row"><label>Mostrar o alfabeto completo por fora</label>
+    <button class="mini tgt" id="cfgOuter"><span class="fill"></span>—</button></div>
+  <div class="row"><label>Alto contraste</label>
+    <button class="mini tgt" id="cfgHC"><span class="fill"></span>—</button></div>
+  <div class="row"><label>Falar sozinho ao fechar a frase</label>
+    <button class="mini tgt" id="cfgAuto"><span class="fill"></span>—</button></div>
+  <div class="row"><label>Velocidade da voz</label>
+    <button class="mini tgt" id="rateDown"><span class="fill"></span>−</button>
+    <span class="val" id="rateVal"></span>
+    <button class="mini tgt" id="rateUp"><span class="fill"></span>+</button></div>
+  <div class="row"><label>Voz</label>
+    <button class="mini tgt" id="cfgVoice"><span class="fill"></span>—</button></div>
+  <div class="row"><label>Cores</label>
+    <button class="mini tgt" id="cfgTheme"><span class="fill"></span>—</button></div>
+  <div class="row"><label>Ensine o seu jeito de escrever<br><span style="font-size:14.5px;color:var(--dim)">cole seus textos ou carregue arquivos — ele aprende suas palavras</span></label>
+    <button class="mini tgt" id="cfgTeach"><span class="fill"></span>🧠 Abrir</button></div>
+  <button class="close tgt" data-close><span class="fill"></span>Fechar</button>
+</div></div>
+
+<script>
+"use strict";
+
+/* ================================================================
+   1. VOCABULÁRIO
+   Base de frequência do português + formas conjugadas dos verbos que
+   mais aparecem na fala do dia a dia + vocabulário de cuidado/saúde
+   + vocabulário de mobilidade urbana, acessibilidade e jornalismo.
+   ================================================================ */
+const BASE = [
+"que","de","não","o","a","e","do","da","em","um","para","com","uma","os","no","se","na","por","mais","as",
+"dos","como","mas","foi","ao","ele","das","tem","à","seu","sua","ou","ser","quando","muito","há","nos","já","está","eu",
+"também","só","pelo","pela","até","isso","ela","entre","era","depois","sem","mesmo","aos","ter","seus","quem","nas","me","esse","eles",
+"estão","você","tinha","foram","essa","num","nem","suas","meu","às","minha","têm","numa","pelos","elas","havia","seja","qual","será","nós",
+"tenho","lhe","deles","essas","esses","pelas","este","fosse","dele","é","são","vai","estar","fazer","dizer","poder","ir","ver","dar","saber",
+"querer","chegar","passar","dever","ficar","falar","deixar","encontrar","chamar","vir","pensar","sair","voltar","começar","conhecer","sentir","viver","contar","olhar","parecer",
+"esperar","sim","agora","hoje","amanhã","ontem","aqui","ali","bem","bom","boa","dia","noite","tarde","manhã","casa","tempo","ano","anos","vez",
+"vezes","gente","pessoa","pessoas","coisa","coisas","vida","mundo","homem","mulher","parte","lugar","momento","forma","caso","grupo","trabalho","ponto","cidade","país",
+"água","comida","fome","sede","banheiro","dor","cabeça","remédio","médico","ajuda","ajudar","obrigado","obrigada","favor","quero","preciso","gosto","amo","amor","sinto",
+"cansado","cansada","feliz","triste","frio","calor","sono","dormir","comer","beber","tomar","banho","televisão","música","telefone","celular","computador","internet","janela","porta",
+"luz","cama","cadeira","mesa","carro","rua","família","mãe","pai","filho","filha","irmão","irmã","avó","avô","tio","tia","amigo","amiga","estou",
+"estava","estamos","posso","pode","podemos","quer","queria","vou","vamos","vem","fica","fico","sei","sabe","faço","faz","gostaria","ainda","assim","então",
+"porque","onde","quanto","quanta","quantos","tudo","nada","algo","alguém","ninguém","todo","toda","todos","todas","outro","outra","outros","outras","cada","qualquer",
+"alguns","algumas","muita","muitos","muitas","pouco","pouca","poucos","poucas","grande","pequeno","pequena","novo","nova","velho","velha","primeiro","primeira","segundo","melhor",
+"pior","maior","menor","dois","duas","três","quatro","cinco","seis","sete","oito","nove","dez","segunda","terça","quarta","quinta","sexta","sábado","domingo",
+"semana","mês","hora","horas","minuto","minutos","talvez","claro","certo","certa","errado","errada","verdade","mentira","desculpa","desculpe","licença","parabéns","saudade","beijo",
+"abraço","tchau","oi","olá","dormiu","acordar","acordei","levantar","sentar","deitar","andar","correr","parar","abrir","fechar","ligar","desligar","ligue","desligue",
+"mudar","canal","volume","aumentar","diminuir","quente","gelado","doce","salgado","gostoso","ruim","dói","doendo","coceira","posição","almofada","travesseiro","coberta","cobertor",
+"roupa","camisa","calça","sapato","óculos","escola","ler","escrever","livro","jogo","jogar","filme","futebol","time","notícia","chuva","sol","vento","praia","viagem",
+"passear","visita","visitar","igreja","festa","aniversário","presente","natal","almoço","jantar","café","lanche","fruta","suco","leite","pão",
+"arroz","feijão","carne","frango","peixe","sopa","bolo","chocolate","sorvete","banana","maçã","laranja","enfermeira","enfermeiro","hospital","consulta","exame","fisioterapia","cuidadora",
+"cuidador","rodas","banheira","fralda","trocar","limpar","coçar","virar","ajeitar","perna","braço","mão","pé","olho","olhos","boca","nariz","ouvido",
+"dente","barriga","costas","pescoço","coração","respirar","respiração","tosse","febre","gripe","dormente","apertado","solto","devagar","rápido","cuidado","atenção",
+"importante","urgente","emergência","socorro","ambulância","calma","tranquilo","tranquila","nervoso","nervosa","preocupado","preocupada","medo","raiva","alegria","chorar","rir","sorrir",
+"conversar","perguntar","responder","pergunta","resposta","história","piada","segredo","surpresa","ideia","plano","problema","solução","dinheiro","comprar","pagar","conta","banco","mercado","farmácia",
+"loja","padaria","restaurante","ônibus","táxi","moto","bicicleta","avião","longe","perto","dentro","fora","cima","baixo","frente","atrás","lado","meio",
+"antes","durante","sempre","nunca","cedo","logo","último","última","próximo","próxima","juntos","junto","sozinho","sozinha","comigo","contigo","conosco"
+];
+
+/* formas conjugadas dos verbos mais falados — o que a pessoa realmente digita */
+const VERBOS = [
+"sou","era","seria","somos","fui","serei","estive","esteve","estivemos","estarei","estaria",
+"tenho","temos","tive","terei","teria","tinha","tinham","tenha",
+"faço","fiz","fizemos","farei","faria","fazia","faça","fazendo",
+"vou","vamos","vai","vão","fui","irei","iria","indo",
+"venho","veio","viemos","virá","viria","venha","vindo",
+"digo","disse","dissemos","direi","diria","diga","dizendo",
+"falo","falei","falou","falamos","falarei","falaria","fale","falando",
+"vejo","viu","vimos","verei","veria","veja","vendo",
+"dou","deu","demos","darei","daria","dê","dando",
+"sei","sabia","soube","saberei","saberia","saiba","sabendo",
+"posso","podia","pude","poderei","poderia","possa","podendo",
+"consigo","consegue","conseguir","consegui","conseguiria","conseguindo",
+"quero","queria","quis","quisera","queremos","querendo",
+"preciso","precisa","precisava","precisei","precisamos","precisando",
+"gostaria","gostei","gostava","gostando",
+"sinto","sente","sentia","senti","sentindo",
+"acho","achei","achava","achando",
+"penso","pensei","pensando","lembro","lembrei","lembrando","esqueci","esquecendo",
+"escrevo","escrevi","escrevendo","leio","li","lendo","ouço","ouvi","ouvindo",
+"entendo","entendi","entendendo","explico","expliquei","mostrar","mostro","mostrei",
+"chamo","chame","chamando","peço","peça","pedi","pedindo",
+"traga","trouxe","trazendo","leve","levei","levando","coloque","coloquei",
+"tire","tirei","abra","abri","feche","fechei","aumente","diminua",
+"mude","mudei","vire","virei","ajeite","ajeitei","levante","levantei",
+"deite","deitei","sente","sentei","pare","parei","espere","esperei",
+"continue","continuei","volte","voltei","cheguei","chegou","saí","saiu",
+"mande","mandei","mandando","envie","enviei","enviando","responda","respondi","respondendo",
+"marque","marquei","marcando","combine","combinei","avise","avisei","avisando"
+];
+
+/* mobilidade urbana, acessibilidade, tecnologia assistiva, jornalismo */
+const AREA = [
+"acessibilidade","acessível","acessíveis","inacessível","mobilidade","urbana","urbano","urbanismo",
+"calçada","calçadas","rampa","rampas","piso","tátil","guia","rebaixamento","faixa","pedestre","pedestres",
+"travessia","semáforo","estacionamento","vaga","vagas","elevador","plataforma","degrau","degraus","obstáculo",
+"transporte","público","coletivo","metrô","trem","terminal","estação","parada","itinerário","tarifa",
+"inclusão","inclusivo","inclusiva","exclusão","barreira","barreiras","adaptado","adaptada","adaptação",
+"deficiência","deficiências","deficiente","pessoa","cadeirante","cadeirantes","mobilidade","reduzida",
+"autonomia","independência","direito","direitos","lei","leis","norma","decreto","política","pública",
+"prefeitura","município","governo","secretaria","gestão","fiscalização","denúncia","reclamação",
+"projeto","projetos","obra","obras","reforma","orçamento","prazo","cronograma",
+"reportagem","matéria","matérias","pauta","pautas","entrevista","entrevistado","apuração","fonte","fontes",
+"texto","artigo","coluna","editorial","post","publicação","redação","edição","editor","jornalista","jornalismo",
+"leitor","leitores","audiência","alcance","engajamento","newsletter","site","portal","blog","link","links",
+"empresa","parceria","parceiro","patrocínio","patrocinador","proposta","contrato","reunião","agenda",
+"evento","palestra","painel","mesa","debate","prêmio","podcast","vídeo","áudio","legenda","transcrição",
+"tecnologia","assistiva","comunicação","alternativa","aumentativa","equipamento","equipamentos","software",
+"rastreador","ocular","olhar","teclado","tela","cursor","clique","piscar","calibrar","calibração",
+"voz","sintetizada","síntese","fala","escrita","digitação","predição","atalho",
+"esclerose","lateral","amiotrófica","neurologista","fisioterapeuta","fonoaudióloga","fonoaudiólogo",
+"terapeuta","ocupacional","nutricionista","diagnóstico","tratamento","evolução","progressão","sintoma",
+"respirador","ventilação","traqueostomia","aspiração","sonda","gastrostomia","saturação","oxigênio",
+"pesquisa","estudo","associação","instituto","ong","doação","doador","campanha","apoio","apoiar","apoiador",
+"agradeço","agradecer","abraços","atenciosamente","cordialmente","obrigado","valeu","parabéns"
+];
+
+const WORDS = Array.from(new Set(
+  BASE.concat(VERBOS).concat(AREA)
+      .map(w => w.toLowerCase())
+      .filter(w => /^[a-záéíóúâêôãõàçüñ]+$/i.test(w))
+));
+
+const OUTER_ABC = ["a","b","c","ç","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"];
+const OUTER_SYM = ["0","1","2","3","4","5","6","7","8","9",".",",","?","!","-","'",":",";","(",")","@","/","+","=","%","\"","*"];
+const SYM_PAGES = [["1","2","3","4","5","6"],["7","8","9","0",".",","],["?","!","-","'",":","%"],["@","/","(",")","\"",";"]];
+
+/* Bigramas de partida: o que costuma vir depois de quê.
+   O aprendizado do usuário se soma a isto e passa a mandar mais. */
+const SEED_NEXT = {
+"«início»":{"eu":6,"não":5,"estou":5,"preciso":5,"quero":5,"pode":4,"por":4,"obrigado":3,"bom":3,"boa":3,"você":3,"o":3,"a":3,"me":3,"vamos":3,"oi":2,"olá":2,"acabei":2},
+"eu":{"quero":6,"preciso":6,"estou":6,"vou":5,"não":5,"tenho":4,"acho":4,"posso":3,"gosto":3,"sinto":3,"também":2,"já":2},
+"estou":{"com":6,"bem":4,"cansado":4,"sentindo":3,"escrevendo":3,"aqui":2,"melhor":2,"pior":2,"triste":2},
+"com":{"dor":5,"fome":5,"sede":5,"sono":4,"frio":3,"calor":3,"medo":2,"você":3,"a":2,"o":2,"ele":2,"ela":2},
+"preciso":{"de":6,"ir":5,"falar":4,"que":3,"do":3,"da":3,"trocar":2,"descansar":2,"responder":2},
+"quero":{"ir":4,"falar":4,"água":4,"ver":3,"comer":3,"dormir":3,"descansar":3,"mudar":3,"escrever":3,"que":2},
+"pode":{"me":6,"vir":3,"ser":3,"chamar":3,"trazer":3,"ajudar":3,"ajeitar":3,"levantar":2},
+"me":{"ajudar":5,"dar":3,"trazer":3,"chamar":2,"levar":2,"escuta":2,"ajeita":2},
+"por":{"favor":8,"que":5,"enquanto":2,"isso":2},
+"muito":{"obrigado":4,"bom":3,"bem":2,"importante":2,"cansado":2},
+"não":{"consigo":4,"estou":3,"quero":3,"sei":3,"é":3,"precisa":2,"tem":2},
+"vou":{"escrever":3,"falar":3,"responder":2,"mandar":2,"tentar":2,"ver":2},
+"de":{"acessibilidade":3,"mobilidade":3,"rodas":3,"água":3,"cadeira":3,"novo":2,"transporte":2},
+"cadeira":{"de":7},
+"mobilidade":{"urbana":6,"reduzida":5},
+"tecnologia":{"assistiva":7},
+"comunicação":{"alternativa":6},
+"esclerose":{"lateral":7},
+"lateral":{"amiotrófica":7},
+"transporte":{"público":7,"coletivo":4},
+"piso":{"tátil":6},
+"faixa":{"de":5},
+"política":{"pública":5},
+"bom":{"dia":8},
+"boa":{"tarde":6,"noite":6},
+"obrigado":{"por":4,"pela":3,"pelo":3},
+"tudo":{"bem":6,"certo":3},
+"vamos":{"marcar":3,"conversar":3,"falar":2,"ver":2},
+"a":{"gente":4,"cidade":2,"calçada":2,"pauta":2,"matéria":2,"reportagem":2},
+"o":{"que":6,"texto":2,"link":2,"portal":2,"projeto":2,"prazo":2}
+};
+
+/* Encadeamento de letras — usado só quando o prefixo não bate com
+   nenhuma palavra conhecida (nomes próprios, gírias, siglas). */
+const CHAR_NEXT = {
+ a:"srnidclmtugpvebfzo", b:"aeoirulm", c:"aoieruhs", "ç":"ãaoóe", d:"aeoiur", e:"snrmlditcugvpaz",
+ f:"aoieru", g:"auoreiu", h:"aeiou", i:"nsacdoterlmvgpz", j:"aouei", k:"aeiou", l:"aeioiuh",
+ m:"aeoiubp", n:"tdaeiocsgu", o:"srnaumdiclpgtvbe", p:"aeoriul", q:"u", r:"aeioumnsdtpcv",
+ s:"aeioutcpmns", t:"aeioruúmns", u:"tnrmscldiaepg", v:"aeioi", w:"aeio", x:"aeioup",
+ y:"aeio", z:"aeioá"
+};
+
+/* ================================================================
+   2. MEMÓRIA — vocabulário aprendido + encadeamento de palavras
+   ================================================================ */
+const K = {cfg:"tr2.cfg", learn:"tr2.learn", next:"tr2.next", text:"tr2.text", phr:"tr2.phr"};
+const load = (k,d) => { try{ const v=JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } };
+const save = (k,v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} };
+const today = () => Math.floor(Date.now()/86400000);
+const strip = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+const HALF_LIFE = 75;   /* dias: uma palavra sem uso perde metade do peso */
+
+let LEARN = load(K.learn, {});
+let NEXT  = load(K.next, {});
+/* migração do formato antigo (número puro) para {n, d} */
+for(const w in LEARN){ if(typeof LEARN[w] === "number") LEARN[w] = {n:LEARN[w], d:today(), pin:0}; }
+
+const BASE_SET = new Set(WORDS.map(strip));
+let ALL = [], ALL_N = [], IDX = {};
+function rebuild(){
+  const extra = Object.keys(LEARN).filter(w => !BASE_SET.has(strip(w)));
+  ALL = WORDS.concat(extra);
+  ALL_N = ALL.map(strip);
+  IDX = {}; ALL.forEach((w,i) => IDX[w] = i);
+}
+rebuild();
+
+function used(w){
+  const e = LEARN[w];
+  if(!e) return 0;
+  return e.n * Math.pow(0.5, (today() - e.d) / HALF_LIFE);
+}
+/* peso final de uma palavra = frequência geral + o quanto ESTA pessoa usa */
+function wWeight(i){
+  const base = i < WORDS.length ? 1/(i + 15) : 0.004;
+  return base + 0.05 * Math.min(used(ALL[i]), 40);
+}
+function okWord(w){ return /^[a-záéíóúâêôãõàçüñ]{2,}$/i.test(w); }
+
+function learnWord(w){
+  w = (w||"").trim().toLowerCase().replace(/^[^a-záéíóúâêôãõàçüñ]+|[^a-záéíóúâêôãõàçüñ]+$/gi,"");
+  if(!okWord(w)) return null;
+  const e = LEARN[w] || {n:0, d:today(), pin:0};
+  e.n = e.n + 1; e.d = today();
+  LEARN[w] = e;
+  prune();
+  save(K.learn, LEARN);
+  if(!BASE_SET.has(strip(w)) && IDX[w] === undefined) rebuild();
+  return w;
+}
+function learnPair(prev, w){
+  if(!w) return;
+  const key = prev || "«início»";
+  const m = NEXT[key] || (NEXT[key] = {});
+  m[w] = (m[w] || 0) + 1;
+  /* mantém no máximo 24 continuações por palavra */
+  const ks = Object.keys(m);
+  if(ks.length > 24){ ks.sort((a,b)=>m[a]-m[b]); delete m[ks[0]]; }
+  save(K.next, NEXT);
+}
+/* poda pelo peso já com esquecimento, nunca apaga palavra fixada */
+function prune(){
+  const ks = Object.keys(LEARN);
+  if(ks.length <= 3000) return;
+  ks.sort((a,b) => (LEARN[a].pin?9e9:used(a)) - (LEARN[b].pin?9e9:used(b)));
+  for(const k of ks.slice(0, 300)) delete LEARN[k];
+  rebuild();
+}
+
+/* ================================================================
+   3. ESTADO E PREDIÇÃO
+   ================================================================ */
+const DEF_CFG = {dwell:false, dwellMs:900, scale:0.92, fs:1, order:"alpha", innerN:0,
+                 outer:true, hc:false, rate:0.95, voice:"", autoSpeak:true, theme:"blue"};
+const THEMES = ["blue","red","green","purple","amber"];
+const THEME_PT = {blue:"azul", red:"vermelho", green:"verde", purple:"roxo", amber:"âmbar"};
+let cfg = Object.assign({}, DEF_CFG, load(K.cfg, {}));
+let text = load(K.text, "") || "";
+let caret = text.length;      /* posição de escrita — dá para voltar e corrigir no meio */
+let page = 0, mode = "abc", paused = false, fixMode = false;
+const undoStack = [];
+
+function pushUndo(){ undoStack.push({t:text, c:caret}); if(undoStack.length > 60) undoStack.shift(); }
+function prefix(){ const m = text.slice(0, caret).match(/[^\s]+$/); return m ? m[0] : ""; }
+function prevWord(){
+  const before = text.slice(0, caret - prefix().length);
+  const m = before.match(/([^\s]+)\s+$/);
+  if(!m) return "«início»";
+  const raw = m[1];
+  if(/[.!?…]$/.test(raw)) return "«início»";
+  const w = raw.toLowerCase().replace(/^[^a-záéíóúâêôãõàçüñ]+|[^a-záéíóúâêôãõàçüñ]+$/gi,"");
+  return w || "«início»";
+}
+function nextMap(){
+  const k = prevWord();
+  const seed = SEED_NEXT[k] || {}, learned = NEXT[k] || {};
+  const m = {};
+  for(const w in seed) m[w] = seed[w] * 0.6;
+  for(const w in learned) m[w] = (m[w] || 0) + learned[w] * 1.6;   /* o aprendido pesa mais */
+  return m;
+}
+
+/* --- candidatas a palavra --- */
+function suggestions(limit){
+  const p = strip(prefix()), nx = nextMap(), out = [];
+  const cand = [];
+  for(let i = 0; i < ALL_N.length; i++){
+    const w = ALL_N[i];
+    if(p){ if(!(w.startsWith(p) && w.length > p.length)) continue; }
+    let s = wWeight(i);
+    const b = nx[ALL[i]] || 0;
+    if(b) s += 0.22 * Math.min(b, 25);
+    else if(!p) s *= 0.30;            /* sem prefixo, quem manda é o encadeamento */
+    cand.push([ALL[i], s]);
+  }
+  cand.sort((a,b) => b[1] - a[1]);
+  const seen = new Set();
+  for(const [w] of cand){
+    if(seen.has(strip(w))) continue;
+    seen.add(strip(w)); out.push(w);
+    if(out.length >= limit) break;
+  }
+  return out;
+}
+
+/* --- critério das letras do anel interno --- */
+function letterScores(){
+  const p = strip(prefix()), nx = nextMap(), score = {};
+  for(let i = 0; i < ALL_N.length; i++){
+    const w = ALL_N[i];
+    if(w.length <= p.length || !w.startsWith(p)) continue;
+    let s = wWeight(i);
+    const b = nx[ALL[i]] || 0;
+    if(b) s += 0.22 * Math.min(b, 25);
+    const c = w[p.length];
+    score[c] = (score[c] || 0) + s;
+  }
+  return score;
+}
+function charFallback(){
+  const p = strip(prefix());
+  const last = p ? p[p.length-1] : "";
+  const seq = (CHAR_NEXT[last] || "aeosrindmutclpvghqbfzjxkwy").split("");
+  const seen = new Set(), out = [];
+  for(const c of seq.concat("aeosrindmutclpvghqbfzjxkwy".split(""))){
+    if(!seen.has(c) && OUTER_ABC.includes(c)){ seen.add(c); out.push(c); }
+  }
+  return out;
+}
+function autoN(sc, ranked){
+  const tot = ranked.reduce((s,l) => s + sc[l], 0) || 1;
+  let acc = 0, n = 0;
+  for(const l of ranked){ acc += sc[l]; n++; if(acc/tot >= 0.92) break; }
+  return Math.max(4, Math.min(8, n));
+}
+const cmpAlpha = (a,b) => a.localeCompare(b, "pt-BR");
+
+function pages(){
+  if(mode === "sym") return SYM_PAGES;
+  const sc = letterScores();
+  let ranked = Object.keys(sc).sort((a,b) => sc[b] - sc[a]);
+  let fallback = false;
+  if(!ranked.length){ ranked = charFallback(); fallback = true; }
+  const n = cfg.innerN || (fallback ? 6 : autoN(sc, ranked));
+  let first = ranked.slice(0, n);
+  const chosen = new Set(first);
+  /* garante ao menos uma vogal na primeira página */
+  if(!first.some(c => "aeiou".includes(c))){
+    const v = ranked.find(c => "aeiou".includes(c)) || "a";
+    first[first.length-1] = v; chosen.clear(); first.forEach(c => chosen.add(c));
+  }
+  if(cfg.order === "alpha") first = first.slice().sort(cmpAlpha);
+  /* páginas seguintes: o que sobrou, em ordem alfabética — previsível */
+  const rest = OUTER_ABC.filter(c => !chosen.has(c));
+  const ps = [first];
+  for(let i = 0; i < rest.length; i += n) ps.push(rest.slice(i, i + n));
+  return ps;
+}
+
+/* ================================================================
+   4. SELEÇÃO: clique, permanência (dwell) e trava anti-repique
+   ================================================================ */
+const COOLDOWN = 450;
+let lockedUntil = 0, dwellTimer = null, dwellEl = null, justFired = null;
+let mx = -1, my = -1;
+addEventListener("mousemove", e => { mx = e.clientX; my = e.clientY; }, {passive:true});
+
+function paint(el, on){
+  const f = el.querySelector && el.querySelector(".fill");
+  if(f){
+    f.style.transition = on ? ("width " + cfg.dwellMs + "ms linear") : "none";
+    if(!on) f.style.width = "";
+  }else{
+    el.style.transition = on ? ("fill " + cfg.dwellMs + "ms linear") : "";
+  }
+  el.classList.toggle("dwelling", !!on);
+}
+function stopDwell(){
+  if(dwellTimer){ clearTimeout(dwellTimer); dwellTimer = null; }
+  if(dwellEl){ paint(dwellEl, false); dwellEl = null; }
+}
+function startDwell(el){
+  if(!cfg.dwell || paused || !el.__fn) return;
+  if(el === justFired) return;
+  if(performance.now() < lockedUntil) return;
+  stopDwell();
+  dwellEl = el; paint(el, true);
+  dwellTimer = setTimeout(() => { dwellTimer = null; fire(el); }, cfg.dwellMs);
+}
+function flash(el){
+  el.style.transition = "none";
+  el.classList.add("flash");
+  setTimeout(() => el.classList.remove("flash"), 150);
+}
+function fire(el){
+  const now = performance.now();
+  if(now < lockedUntil || paused) return;
+  lockedUntil = now + COOLDOWN;
+  justFired = el;
+  stopDwell();
+  flash(el);
+  document.body.classList.add("locked");
+  setTimeout(() => { document.body.classList.remove("locked"); rearm(); }, COOLDOWN);
+  el.__fn();
+}
+/* depois de redesenhar a roda o elemento sob o cursor é outro:
+   rearma a permanência sozinho, senão o dwell "trava" */
+function rearm(){
+  if(!cfg.dwell || paused || mx < 0) return;
+  const el = document.elementFromPoint(mx, my);
+  const t = el && el.closest ? (el.__fn ? el : el.closest("[data-tgt]")) : null;
+  const target = (el && el.__fn) ? el : (t && t.__fn ? t : null);
+  justFired = null;
+  if(target) startDwell(target);
+}
+function bind(el, fn){
+  el.__fn = fn;
+  el.setAttribute("data-tgt","1");
+  el.addEventListener("click", e => { e.preventDefault(); fire(el); });
+  el.addEventListener("mouseenter", () => startDwell(el));
+  el.addEventListener("mouseleave", () => { if(justFired === el) justFired = null; stopDwell(); });
+  return el;
+}
+
+/* ================================================================
+   5. DESENHO DA RODA
+   centro 425,425
+   0..88    zona de descanso — não faz nada, pode olhar à vontade
+   104..196 funções (espaço, falar, trocar, apagar, desfazer)
+   208..302 letras prováveis
+   314..408 alfabeto completo
+   ================================================================ */
+const svg = document.getElementById("wheel");
+const CX = 425, CY = 425, REST = 88;
+const H0 = 104, H1 = 196, I0 = 208, I1 = 302, O0 = 314, O1 = 408;
+
+function polar(r, a){ const t = (a - 90) * Math.PI/180; return [CX + r*Math.cos(t), CY + r*Math.sin(t)]; }
+function ring(r0, r1, a0, a1){
+  const big = (a1 - a0) > 180 ? 1 : 0;
+  const [x0,y0] = polar(r1,a0), [x1,y1] = polar(r1,a1), [x2,y2] = polar(r0,a1), [x3,y3] = polar(r0,a0);
+  return `M${x0},${y0} A${r1},${r1} 0 ${big} 1 ${x1},${y1} L${x2},${y2} A${r0},${r0} 0 ${big} 0 ${x3},${y3} Z`;
+}
+function E(tag, at){ const e = document.createElementNS("http://www.w3.org/2000/svg", tag); for(const k in at) e.setAttribute(k, at[k]); return e; }
+
+function drawWheel(){
+  svg.innerHTML = "";
+  const ps = pages();
+  if(page >= ps.length) page = 0;
+  const letters = ps[page] || [];
+
+  /* anel externo — alfabeto inteiro, posição fixa para sempre */
+  if(cfg.outer){
+    const chars = (mode === "abc") ? OUTER_ABC : OUTER_SYM;
+    const g = E("g", {class:"outer"});
+    const step = 360 / chars.length;
+    chars.forEach((ch,i) => {
+      const a0 = i*step - step/2;
+      const p = E("path", {d: ring(O0, O1, a0, a0+step), class:"wedge"});
+      bind(p, () => typeChar(ch));
+      g.appendChild(p);
+      const [tx,ty] = polar((O0+O1)/2, a0 + step/2);
+      const t = E("text", {x:tx, y:ty, class:"lbl outerLbl", "font-size":"42"});
+      t.textContent = (mode === "abc") ? ch.toUpperCase() : ch;
+      g.appendChild(t);
+    });
+    svg.appendChild(g);
+  }
+
+  /* anel interno — letras prováveis, quantidade adaptativa */
+  const n = Math.max(1, letters.length);
+  const step = 360 / n;
+  letters.forEach((ch,i) => {
+    const a0 = i*step - step/2;
+    const p = E("path", {d: ring(I0, I1, a0, a0+step), class:"wedge"});
+    bind(p, () => typeChar(ch));
+    svg.appendChild(p);
+    const [tx,ty] = polar((I0+I1)/2, a0 + step/2);
+    const t = E("text", {x:tx, y:ty, class:"lbl", "font-size":"66"});
+    t.textContent = (mode === "abc") ? ch.toUpperCase() : ch;
+    svg.appendChild(t);
+  });
+
+  /* anel de funções — 6 setores, os dois de apagar longe do espaço */
+  const FN = [
+    {ic:"",   lb:"espaço",  fn:doSpace},
+    {ic:"🔊", lb:"falar",   fn:doSpeak},
+    {ic:"↻",  lb:"trocar",  fn:doSwap},
+    {ic:"⌫",  lb:"letra",   fn:doBack,     danger:1},
+    {ic:"⌫⌫", lb:"palavra", fn:doBackWord, danger:1},
+    {ic:"⤺",  lb:"desfazer",fn:doUndo}
+  ];
+  FN.forEach((q,i) => {
+    const a0 = i*60 - 30;
+    const p = E("path", {d: ring(H0, H1, a0, a0+60), class:"quad" + (q.danger ? " danger" : "")});
+    bind(p, q.fn);
+    svg.appendChild(p);
+    const [ix,iy] = polar((H0+H1)/2, a0 + 30);
+    if(q.ic){
+      const t1 = E("text", {x:ix, y:iy-13, class:"lbl", "font-size":"34"}); t1.textContent = q.ic;
+      const t2 = E("text", {x:ix, y:iy+21, class:"lbl sub", "font-size":"19"}); t2.textContent = q.lb;
+      svg.appendChild(t1); svg.appendChild(t2);
+    }else{
+      const t = E("text", {x:ix, y:iy, class:"lbl", "font-size":"27"}); t.textContent = q.lb;
+      svg.appendChild(t);
+    }
+  });
+
+  /* arco do logo: também diz em que página o anel interno está */
+  if(ps.length > 1){
+    const R = (cfg.outer ? O1 : I1) + 12;
+    const span = 360/ps.length, aa = page*span + 3, ab = aa + span - 6;
+    const [ax0,ay0] = polar(R, aa), [ax1,ay1] = polar(R, ab);
+    const big = (span - 6) > 180 ? 1 : 0;
+    svg.appendChild(E("path", {d:`M${ax0},${ay0} A${R},${R} 0 ${big} 1 ${ax1},${ay1}`, class:"pageArc"}));
+  }
+
+  /* zona de descanso — inerte de propósito, com o miolo do logo */
+  svg.appendChild(E("circle", {cx:CX, cy:CY, r:REST, id:"restZone"}));
+  svg.appendChild(E("circle", {cx:CX, cy:CY, r:REST*0.62, id:"restDot"}));
+  const r1 = E("text", {x:CX, y:CY-16, class:"restTxt", "font-size":"22"});
+  r1.textContent = "descanso";
+  const r2 = E("text", {x:CX, y:CY+16, class:"restTxt", "font-size":"26"});
+  r2.textContent = ps.length > 1 ? (page+1) + "/" + ps.length : "•";
+  svg.appendChild(r1); svg.appendChild(r2);
+}
+
+/* ================================================================
+   6. AÇÕES
+   ================================================================ */
+const out = document.getElementById("out");
+const sugRow = document.getElementById("sugRow");
+const statusEl = document.getElementById("status");
+
+function say(msg, ms){ statusEl.textContent = msg; clearTimeout(say._t); say._t = setTimeout(() => statusEl.textContent = "", ms || 3500); }
+
+function ins(s){ text = text.slice(0, caret) + s + text.slice(caret); caret += s.length; }
+function typeChar(ch){
+  pushUndo(); ins(ch); page = 0; render();
+  /* numa conversa, esperar a mensagem inteira mata a troca:
+     ao fechar a frase, ela já sai falada */
+  if(cfg.autoSpeak && /[.!?…]/.test(ch)) speak(lastSentence());
+}
+function lastSentence(){
+  const b = text.slice(0, caret);
+  const m = b.match(/[^.!?…]*[.!?…]\s*$/);
+  return (m ? m[0] : b).trim();
+}
+function moveWord(dir){
+  if(dir < 0){
+    const m = text.slice(0, caret).match(/\S*\s*$/);
+    caret = Math.max(0, caret - Math.max(1, m ? m[0].length : 1));
+  }else{
+    const m = text.slice(caret).match(/^\s*\S*/);
+    caret = Math.min(text.length, caret + Math.max(1, m ? m[0].length : 1));
+  }
+  page = 0; render();
+}
+
+/* chamador de atenção: dois toques curtos e um aviso falado.
+   Sem isso o interlocutor desiste e vai embora antes da frase sair. */
+function attention(){
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AC(), t0 = ctx.currentTime;
+    [880, 1245].forEach((f,i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain(), t = t0 + i*0.24;
+      o.type = "sine"; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.30, t + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t); o.stop(t + 0.26);
+    });
+  }catch(e){}
+  setTimeout(() => speak("Espera, estou escrevendo."), 700);
+  say("chamando atenção…");
+}
+
+/* modo conversa: o texto grande, para quem está do outro lado ler */
+function openTalk(){
+  const t = document.getElementById("talkText");
+  const v = text.trim();
+  t.textContent = v || "o que você escrever aparece aqui, grande, para a outra pessoa ler";
+  t.classList.toggle("vazio", !v);
+  document.getElementById("talkOverlay").classList.add("on");
+  if(v) speak(v);
+}
+function acceptWord(w){
+  pushUndo();
+  const p = prefix(), prev = prevWord();
+  text = text.slice(0, caret - p.length) + w + " " + text.slice(caret);
+  caret = caret - p.length + w.length + 1;
+  learnWord(w); learnPair(prev, w.toLowerCase());
+  page = 0; render();
+}
+function doSpace(){
+  pushUndo();
+  const p = prefix(), prev = prevWord();
+  const w = learnWord(p);
+  if(w) learnPair(prev, w);
+  ins(" "); page = 0; render();
+}
+function doBack(){
+  if(!caret) return;
+  pushUndo(); text = text.slice(0, caret-1) + text.slice(caret); caret--; page = 0; render();
+}
+function doBackWord(){
+  if(!caret) return;
+  pushUndo();
+  const b = text.slice(0, caret).replace(/\s*[^\s]*$/,"");
+  text = b + text.slice(caret); caret = b.length; page = 0; render();
+}
+function doUndo(){
+  if(!undoStack.length){ say("nada para desfazer"); return; }
+  const s = undoStack.pop(); text = s.t; caret = s.c; page = 0; render();
+}
+function doSwap(){ page = (page + 1) % pages().length; drawWheel(); }
+function doSpeak(){ speak(text); }
+
+let voices = [];
+function pickVoice(){
+  if(cfg.voice){ const v = voices.find(v => v.name === cfg.voice); if(v) return v; }
+  return voices.find(v => /pt[-_]BR/i.test(v.lang)) || voices.find(v => /^pt/i.test(v.lang)) || null;
+}
+function speak(t){
+  if(!("speechSynthesis" in window)){ say("voz não disponível neste navegador"); return; }
+  if(!t.trim()){ say("nada escrito ainda"); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(t);
+  u.lang = "pt-BR"; u.rate = cfg.rate;
+  const v = pickVoice(); if(v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+if("speechSynthesis" in window){
+  const loadV = () => { voices = speechSynthesis.getVoices(); syncCfgUI(); };
+  loadV(); speechSynthesis.onvoiceschanged = loadV;
+}
+
+/* ================================================================
+   7. RENDER
+   ================================================================ */
+function wordBtn(w, p){
+  const b = document.createElement("button");
+  b.className = "word tgt";
+  b.innerHTML = '<span class="fill"></span><b>' + w.slice(0, p.length) + '</b>' + w.slice(p.length);
+  bind(b, () => acceptWord(w));
+  return b;
+}
+/* o texto é desenhado palavra a palavra; no modo corrigir cada palavra
+   vira um alvo que reposiciona o cursor de escrita ali */
+function renderOut(){
+  out.innerHTML = "";
+  const frag = document.createDocumentFragment();
+  let done = false;
+  const putCaret = () => { const c = document.createElement("span"); c.className = "caret"; frag.appendChild(c); done = true; };
+  const mkWord = (s, end) => {
+    const e = document.createElement("span");
+    e.className = "w"; e.textContent = s;
+    if(fixMode) e.addEventListener("click", () => { caret = end; fixMode = false; document.body.classList.remove("fix"); document.getElementById("btnFix").classList.remove("ativo"); render(); });
+    return e;
+  };
+  const re = /\s+|\S+/g; let m;
+  while((m = re.exec(text))){
+    const tok = m[0], a = m.index, b = a + tok.length;
+    if(/\s/.test(tok[0])){
+      if(!done && caret >= a && caret <= b){
+        frag.appendChild(document.createTextNode(text.slice(a, caret)));
+        putCaret();
+        frag.appendChild(document.createTextNode(text.slice(caret, b)));
+      }else frag.appendChild(document.createTextNode(tok));
+    }else{
+      if(!done && caret === a) putCaret();
+      if(!done && caret > a && caret < b){
+        frag.appendChild(mkWord(text.slice(a, caret), b));
+        putCaret();
+        frag.appendChild(mkWord(text.slice(caret, b), b));
+      }else{
+        frag.appendChild(mkWord(tok, b));
+        if(!done && caret === b) putCaret();
+      }
+    }
+  }
+  if(!done) putCaret();
+  out.appendChild(frag);
+  if(caret >= text.length) out.scrollTop = out.scrollHeight;
+}
+
+function render(){
+  save(K.text, text);
+
+  renderOut();
+
+  const p = prefix();
+  const tail = document.getElementById("tail");
+  tail.innerHTML = "";
+  const m = text.slice(0, caret).match(/(\S+\s+){0,3}\S*$/);
+  const t = m ? m[0] : "";
+  const prevPart = t.slice(0, t.length - p.length);
+  if(prevPart){ const s = document.createElement("span"); s.className = "prev"; s.textContent = prevPart; tail.appendChild(s); }
+  if(p){ const s = document.createElement("span"); s.className = "cur"; s.textContent = p; tail.appendChild(s); }
+  const cc = document.createElement("span"); cc.className = "caret"; tail.appendChild(cc);
+  tail.classList.toggle("empty", text === "");
+
+  sugRow.innerHTML = "";
+  for(const w of suggestions(3)) sugRow.appendChild(wordBtn(w, p));
+
+  drawWheel();
+}
+
+/* ================================================================
+   8. TAMANHO
+   ================================================================ */
+function fit(){
+  document.documentElement.style.setProperty("--fs", cfg.fs);
+  const h = window.innerHeight - 190;
+  const w = window.innerWidth * 0.58;
+  const base = Math.max(380, Math.min(h, w));
+  const s = Math.max(340, Math.round(base * cfg.scale));
+  svg.style.width = s + "px"; svg.style.height = s + "px";
+}
+addEventListener("resize", fit);
+
+/* ================================================================
+   9. FRASES PRONTAS
+   ================================================================ */
+const DEF_PHR = [
+  "Estou com dor.", "Preciso ir ao banheiro.", "Estou com sede.", "Pode me ajudar, por favor?",
+  "Quero mudar de posição.", "Chame a enfermeira, por favor.", "Espere um pouco, estou escrevendo.",
+  "Sim.", "Não.", "Obrigado!", "Estou bem, obrigado.", "Vamos marcar uma conversa?"
+];
+let PHR = load(K.phr, null) || DEF_PHR.slice();
+let phrRemoveMode = false;
+
+function renderPhrases(){
+  const g = document.getElementById("phraseGrid");
+  g.innerHTML = "";
+  PHR.forEach((f,i) => {
+    const b = document.createElement("button");
+    b.className = "phrase tgt";
+    b.innerHTML = '<span class="fill"></span>' + (phrRemoveMode ? "🗑 " : "") + f;
+    bind(b, () => {
+      if(phrRemoveMode){
+        PHR.splice(i,1); save(K.phr, PHR); phrRemoveMode = false; renderPhrases(); say("frase removida");
+      }else{
+        pushUndo();
+        text = (text && !/\s$/.test(text) ? text + " " : text) + f + " ";
+        closeModals(); render(); speak(f);
+      }
+    });
+    g.appendChild(b);
+  });
+}
+
+/* ================================================================
+   10. JANELAS E AJUSTES
+   ================================================================ */
+function closeModals(){ document.querySelectorAll(".modal").forEach(m => m.classList.remove("on")); }
+function openModal(id){ closeModals(); document.getElementById(id).classList.add("on"); }
+document.querySelectorAll("[data-close]").forEach(b => bind(b, closeModals));
+addEventListener("keydown", e => { if(e.key === "Escape") closeModals(); });
+
+function syncCfgUI(){
+  const set = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
+  set("cfgDwell", cfg.dwell ? "ligada" : "desligada");
+  set("dwellVal", (cfg.dwellMs/1000).toFixed(1) + "s");
+  set("szVal", Math.round(cfg.scale*100) + "%");
+  set("fsVal", Math.round(cfg.fs*100) + "%");
+  set("cfgOrder", cfg.order === "alpha" ? "alfabética" : "por probabilidade");
+  set("cfgN", cfg.innerN ? cfg.innerN + " letras" : "automático");
+  set("cfgOuter", cfg.outer ? "sim" : "não");
+  set("cfgHC", cfg.hc ? "ligado" : "desligado");
+  set("cfgTheme", THEME_PT[cfg.theme] || "azul");
+  document.body.dataset.theme = cfg.theme || "blue";
+  set("cfgAuto", cfg.autoSpeak ? "sim" : "não");
+  set("rateVal", cfg.rate.toFixed(2) + "x");
+  const v = pickVoice();
+  set("cfgVoice", v ? v.name.slice(0,26) : "padrão do sistema");
+  document.getElementById("cfgDwell").classList.toggle("on", cfg.dwell);
+  document.getElementById("cfgHC").classList.toggle("on", cfg.hc);
+  document.body.classList.toggle("hc", cfg.hc);
+  const stats = document.getElementById("learnStats");
+  if(stats) stats.textContent = Object.keys(LEARN).length + " palavras suas aprendidas · " +
+    Object.keys(NEXT).length + " encadeamentos · " + ALL.length + " palavras no dicionário";
+  renderTopWords();
+}
+function renderTopWords(){
+  const box = document.getElementById("topWords");
+  if(!box) return;
+  const ks = Object.keys(LEARN).sort((a,b) => used(b) - used(a)).slice(0, 24);
+  box.innerHTML = "";
+  if(!ks.length){
+    const e = document.createElement("span");
+    e.textContent = "ainda nada — cole um texto acima e as palavras que você mais usa aparecem aqui";
+    box.appendChild(e);
+    return;
+  }
+  for(const w of ks){
+    const e = document.createElement("span");
+    e.textContent = w;
+    const n = document.createElement("b");
+    n.textContent = Math.round(used(w));
+    e.appendChild(n);
+    box.appendChild(e);
+  }
+}
+function setCfg(patch){ Object.assign(cfg, patch); save(K.cfg, cfg); syncCfgUI(); fit(); render(); }
+
+const B = (id, fn) => { const e = document.getElementById(id); if(e) bind(e, fn); };
+B("btnSpeak",  () => speak(text));
+B("btnAtt",    attention);
+B("btnTalk",   openTalk);
+B("talkClose", () => document.getElementById("talkOverlay").classList.remove("on"));
+B("btnPhrases",() => { renderPhrases(); openModal("mPhrases"); });
+B("btnCfg",    () => { syncCfgUI(); openModal("mCfg"); });
+B("btnLearn",  () => { syncCfgUI(); openModal("mLearn"); });
+B("cfgTeach",  () => { syncCfgUI(); openModal("mLearn"); });
+B("btnClear",  () => { pushUndo(); text = ""; caret = 0; page = 0; render(); say("texto apagado — dá para desfazer na roda"); });
+B("btnPrev",   () => moveWord(-1));
+B("btnNext",   () => moveWord(1));
+B("btnFix",    () => {
+  fixMode = !fixMode;
+  document.body.classList.toggle("fix", fixMode);
+  document.getElementById("btnFix").classList.toggle("ativo", fixMode);
+  say(fixMode ? "toque na palavra onde quer continuar escrevendo" : "");
+  render();
+});
+B("btnMode",   () => { mode = (mode === "abc") ? "sym" : "abc";
+                       document.getElementById("btnMode").lastChild.textContent = (mode === "abc") ? "123 / ?!" : "ABC";
+                       page = 0; render(); });
+B("btnPause",  () => { paused = !paused;
+                       document.body.classList.toggle("paused", paused);
+                       document.getElementById("btnPause").lastChild.textContent = paused ? "▶ Retomar" : "⏸ Pausar";
+                       say(paused ? "teclado pausado — pode olhar a tela à vontade" : "teclado ativo"); });
+
+B("cfgDwell", () => setCfg({dwell: !cfg.dwell}));
+B("dwellDown",() => setCfg({dwellMs: Math.max(400, cfg.dwellMs - 100)}));
+B("dwellUp",  () => setCfg({dwellMs: Math.min(2500, cfg.dwellMs + 100)}));
+B("szDown",   () => setCfg({scale: Math.max(0.45, +(cfg.scale - 0.06).toFixed(2))}));
+B("szUp",     () => setCfg({scale: Math.min(1.15, +(cfg.scale + 0.06).toFixed(2))}));
+B("fsDown",   () => setCfg({fs: Math.max(0.7, +(cfg.fs - 0.1).toFixed(2))}));
+B("fsUp",     () => setCfg({fs: Math.min(1.6, +(cfg.fs + 0.1).toFixed(2))}));
+B("cfgOrder", () => setCfg({order: cfg.order === "alpha" ? "prob" : "alpha"}));
+B("cfgN",     () => { const seq = [0,4,5,6,8]; setCfg({innerN: seq[(seq.indexOf(cfg.innerN)+1) % seq.length]}); });
+B("cfgOuter", () => setCfg({outer: !cfg.outer}));
+B("cfgHC",    () => setCfg({hc: !cfg.hc}));
+B("cfgTheme", () => setCfg({theme: THEMES[(THEMES.indexOf(cfg.theme || "blue") + 1) % THEMES.length]}));
+B("cfgAuto",  () => setCfg({autoSpeak: !cfg.autoSpeak}));
+B("rateDown", () => setCfg({rate: Math.max(0.5, +(cfg.rate - 0.05).toFixed(2))}));
+B("rateUp",   () => setCfg({rate: Math.min(1.6, +(cfg.rate + 0.05).toFixed(2))}));
+B("cfgVoice", () => {
+  const pt = voices.filter(v => /^pt/i.test(v.lang));
+  if(!pt.length){ say("nenhuma voz em português instalada"); return; }
+  const cur = pt.findIndex(v => v.name === cfg.voice);
+  setCfg({voice: pt[(cur + 1) % pt.length].name});
+  speak("Assim que eu vou falar.");
+});
+
+B("phSave", () => {
+  const t = text.trim();
+  if(!t){ say("escreva alguma coisa primeiro"); return; }
+  PHR.unshift(t); save(K.phr, PHR); renderPhrases(); say("frase salva");
+});
+B("phDel", () => { phrRemoveMode = !phrRemoveMode; renderPhrases(); say(phrRemoveMode ? "toque na frase que quer remover" : ""); });
+
+/* --- ensinar com texto --- */
+function learnFromText(t){
+  const toks = t.toLowerCase().split(/[^a-záéíóúâêôãõàçüñ]+/).filter(okWord);
+  let novas = 0, pares = 0, prev = "«início»";
+  const sentences = t.toLowerCase().split(/[.!?…\n]+/);
+  for(const s of sentences){
+    prev = "«início»";
+    for(const w of s.split(/[^a-záéíóúâêôãõàçüñ]+/).filter(okWord)){
+      if(!LEARN[w]) novas++;
+      learnWord(w); learnPair(prev, w); pares++; prev = w;
+    }
+  }
+  return {toks: toks.length, novas, pares};
+}
+B("learnGo", () => {
+  const t = document.getElementById("learnTxt").value || "";
+  const r = learnFromText(t);
+  rebuild(); syncCfgUI(); render();
+  say("aprendi " + r.toks + " palavras (" + r.novas + " novas) e " + r.pares + " encadeamentos", 6000);
+});
+B("learnFiles", () => {
+  const inp = document.createElement("input");
+  inp.type = "file"; inp.multiple = true;
+  inp.accept = ".txt,.md,.csv,.text,.json,text/plain,application/json";
+  inp.onchange = () => {
+    const files = Array.from(inp.files); if(!files.length) return;
+    let done = 0, toks = 0, novas = 0, pares = 0, backups = 0;
+    const finish = () => {
+      if(++done < files.length) return;
+      rebuild(); syncCfgUI(); render();
+      let msg = "li " + files.length + " arquivo" + (files.length > 1 ? "s" : "") + ": " +
+        toks + " palavras (" + novas + " novas), " + pares + " encadeamentos";
+      if(backups) msg += " e " + backups + " backup" + (backups > 1 ? "s" : "") + " mesclado" + (backups > 1 ? "s" : "");
+      say(msg, 8000);
+    };
+    for(const f of files){
+      const r = new FileReader();
+      r.onload = () => {
+        const txt = r.result || "";
+        let asBackup = null;
+        try{
+          const d = JSON.parse(txt);
+          if(d && (d.learn || d.next)) asBackup = d;
+        }catch(e){}
+        if(asBackup){
+          if(asBackup.learn){ for(const w in asBackup.learn){
+            const v = asBackup.learn[w];
+            const n = (typeof v === "number") ? v : (v && v.n) || 1;
+            const e = LEARN[w] || {n:0, d:today(), pin:0};
+            e.n += n; e.d = today();
+            LEARN[w] = e;
+          } prune(); save(K.learn, LEARN); }
+          if(asBackup.next){ for(const a in asBackup.next){
+            const m = NEXT[a] || (NEXT[a] = {});
+            for(const b in asBackup.next[a]) m[b] = (m[b] || 0) + asBackup.next[a][b];
+            const ks = Object.keys(m);
+            while(ks.length > 24){ ks.sort((x,y)=>m[x]-m[y]); delete m[ks.shift()]; }
+          } save(K.next, NEXT); }
+          if(asBackup.phr){ for(const p of asBackup.phr){ if(!PHR.includes(p)) PHR.push(p); } save(K.phr, PHR); renderPhrases(); }
+          backups++;
+        }else{
+          const res = learnFromText(txt);
+          toks += res.toks; novas += res.novas; pares += res.pares;
+        }
+        finish();
+      };
+      r.onerror = finish;
+      r.readAsText(f);
+    }
+  };
+  inp.click();
+});
+B("learnExp", () => {
+  const blob = new Blob([JSON.stringify({learn:LEARN, next:NEXT, phr:PHR, cfg:cfg}, null, 1)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "gazewheel-aprendizado.json";
+  a.click();
+  say("arquivo de backup gerado — guarde em lugar seguro", 6000);
+});
+B("learnImp", () => {
+  const inp = document.createElement("input");
+  inp.type = "file"; inp.accept = "application/json";
+  inp.onchange = () => {
+    const f = inp.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try{
+        const d = JSON.parse(r.result);
+        if(d.learn) LEARN = d.learn;
+        if(d.next) NEXT = d.next;
+        if(d.phr) PHR = d.phr;
+        for(const w in LEARN){ if(typeof LEARN[w] === "number") LEARN[w] = {n:LEARN[w], d:today(), pin:0}; }
+        save(K.learn, LEARN); save(K.next, NEXT); save(K.phr, PHR);
+        rebuild(); syncCfgUI(); render(); say("aprendizado restaurado", 5000);
+      }catch(e){ say("arquivo inválido"); }
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+});
+
+/* ================================================================
+   11. INÍCIO
+   ================================================================ */
+syncCfgUI();
+fit();
+render();
+</script>
+</body>
+</html>
