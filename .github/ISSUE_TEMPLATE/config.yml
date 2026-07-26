@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Send by e-mail instead / Prefiro mandar por e-mail
+    url: mailto:contato@freeschool.com.br?subject=GazeWheel
+    about: No GitHub account needed — attach your screenshots to the e-mail.

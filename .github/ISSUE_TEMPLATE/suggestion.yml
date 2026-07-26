@@ -1,0 +1,49 @@
+name: Suggestion / Sugestão
+description: Something that would make GazeWheel better — or something that got in the way
+title: "[suggestion] "
+labels: ["suggestion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Write in **English or Portuguese** — whichever is easier. Escreva em inglês ou português.
+
+        You can **drag a screenshot straight into any field below** (or paste with Ctrl+V).
+        Você pode **arrastar um print para qualquer campo abaixo** (ou colar com Ctrl+V).
+
+  - type: dropdown
+    id: version
+    attributes:
+      label: Which version / Qual versão
+      options:
+        - English (gazewheel.org/en.html)
+        - Português (gazewheel.org/pt.html)
+        - Both / As duas
+        - Not sure / Não sei
+    validations:
+      required: false
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What would make it better? / O que melhoraria?
+      description: What you were trying to do, and what got in the way. Screenshots welcome.
+      placeholder: |
+        e.g. the letters are hard to hit when I'm tired — could the inner ring have a "large targets" mode?
+    validations:
+      required: true
+
+  - type: textarea
+    id: setup
+    attributes:
+      label: Your setup / Seu equipamento
+      description: Eye tracker, head mouse, trackball, tablet, browser — whatever you know.
+      placeholder: |
+        e.g. Tobii PCEye + Windows 11 + Chrome, dwell off
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. Someone will reply in this thread. / Obrigado — a resposta vem aqui mesmo, nesta conversa.

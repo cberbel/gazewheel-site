@@ -134,6 +134,10 @@
   .mini{background:var(--panel2); border-radius:10px; height:46px; min-width:56px; font-size:19px; font-weight:700; padding:0 14px;}
   .mini:hover{background:#33436a;}
   .mini.on{background:var(--accent); color:#0f1420;}
+  #cmdRow{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+  #cmdBox{flex:1; min-width:230px; background:var(--panel2); border:1px solid #33436a; color:var(--text);
+          border-radius:10px; padding:12px 14px; font-size:17px; font-family:inherit;}
+  #cmdOut{margin-top:9px; color:var(--dim); font-size:15px; line-height:1.4;}
   #topWords{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 4px;}
   #topWords span{background:var(--panel2); border-radius:999px; padding:6px 14px; font-size:16px; color:#cddaf0;}
   #topWords span b{color:var(--accent); font-weight:700; margin-left:6px; font-size:14px;}
@@ -224,6 +228,14 @@
   <p class="hint">Pensado para quem controla o cursor com os olhos. Se o seu equipamento já faz o clique sozinho
   (Tobii Windows Control, por exemplo), deixe a seleção por permanência <b>desligada</b> para não haver dois tempos de espera.</p>
 
+  <div class="row" style="display:block"><label>Peça do seu jeito</label>
+    <div id="cmdRow">
+      <input id="cmdBox" type="text" placeholder="muda para vermelho · letras maiores · fala mais devagar">
+      <button class="mini tgt" id="cmdGo"><span class="fill"></span>Aplicar</button>
+      <button class="mini tgt" id="cmdFromText"><span class="fill"></span>Usar o que escrevi</button>
+    </div>
+    <div id="cmdOut"></div>
+  </div>
   <div class="row"><label>Selecionar parando o cursor (dwell)</label>
     <button class="mini tgt" id="cfgDwell"><span class="fill"></span>—</button></div>
   <div class="row"><label>Tempo de permanência</label>
@@ -1198,7 +1210,79 @@ B("learnImp", () => {
 });
 
 /* ================================================================
-   11. INÍCIO
+   11. PEDIDOS EM LINGUAGEM NATURAL
+   "muda para vermelho", "letras maiores", "fala mais devagar" —
+   interpretado aqui mesmo, sem servidor: vale só para este navegador.
+   ================================================================ */
+const CMD_HINT = "tente: muda para vermelho · letras maiores · roda menor · fala mais devagar · alto contraste ligado · dwell ligado · menos letras";
+function setCmdOut(m){ const e = document.getElementById("cmdOut"); if(e) e.textContent = m; }
+
+function applyCommand(raw){
+  const s = " " + (raw || "").toLowerCase().trim() + " ";
+  if(!s.trim()){ setCmdOut(CMD_HINT); return; }
+  const has = (...ws) => ws.some(x => s.indexOf(x) >= 0);
+  const on   = /\b(on|enabled?|ligar?|ligue|ligado|ativar?|ative)\b/.test(s);
+  const off  = /\b(off|disabled?|desligar?|desligue|desligado|desativar?|desative|sem|hide|escond\w*)\b/.test(s);
+  const up   = has("bigger","larger","increase","maior","aument","grande");
+  const down = has("smaller","decrease","reduce","menor","diminu","pequen");
+  const more = has("more ","mais ");
+  const less = has("fewer","less ","menos ");
+  const faster = has("faster","quicker","rapid","rápid","depressa");
+  const slower = has("slower"," slow","devagar","lent");
+  const did = [];
+
+  const COLORS = {red:["red","vermelh"], blue:["blue","azul"], green:["green","verde"],
+                  purple:["purple","roxo","lilás","lilas"], amber:["amber","ambar","âmbar","amarel","laranj"]};
+  for(const k in COLORS){
+    if(COLORS[k].some(x => s.indexOf(x) >= 0)){ setCfg({theme:k}); did.push("cores: " + THEME_PT[k]); break; }
+  }
+  if(has("contrast","contraste")){
+    const v = off ? false : (on ? true : !cfg.hc);
+    setCfg({hc:v}); did.push("alto contraste " + (v ? "ligado" : "desligado"));
+  }
+  if(has("dwell","permanên","permanenc","parando")){
+    if(faster || down){ setCfg({dwellMs: Math.max(400, cfg.dwellMs - 200)}); did.push("permanência " + (cfg.dwellMs/1000).toFixed(1) + "s"); }
+    else if(slower || up){ setCfg({dwellMs: Math.min(2500, cfg.dwellMs + 200)}); did.push("permanência " + (cfg.dwellMs/1000).toFixed(1) + "s"); }
+    else { const v = off ? false : (on ? true : !cfg.dwell); setCfg({dwell:v}); did.push("permanência " + (v ? "ligada" : "desligada")); }
+  }else if(has("voice","voz","speak","fala","speech")){
+    if(has("auto")){ const v = off ? false : (on ? true : !cfg.autoSpeak); setCfg({autoSpeak:v}); did.push("fala automática " + (v ? "ligada" : "desligada")); }
+    else if(faster){ setCfg({rate: Math.min(1.6, +(cfg.rate + 0.1).toFixed(2))}); did.push("voz " + cfg.rate + "x"); }
+    else if(slower){ setCfg({rate: Math.max(0.5, +(cfg.rate - 0.1).toFixed(2))}); did.push("voz " + cfg.rate + "x"); }
+  }
+  if(has("alphabet","alfabeto")){
+    const v = !(off || less);
+    setCfg({outer:v}); did.push("alfabeto externo " + (v ? "ligado" : "desligado"));
+  }
+  if(has("letter","letra") && (more || less)){
+    const cur = cfg.innerN || 6;
+    const n = less ? Math.max(4, cur - 1) : Math.min(8, cur + 1);
+    setCfg({innerN:n}); did.push("anel interno: " + n + " letras");
+  }else if(has("wheel","roda","circle","círculo","circulo")){
+    if(up){ setCfg({scale: Math.min(1.15, +(cfg.scale + 0.12).toFixed(2))}); did.push("roda " + Math.round(cfg.scale*100) + "%"); }
+    else if(down){ setCfg({scale: Math.max(0.45, +(cfg.scale - 0.12).toFixed(2))}); did.push("roda " + Math.round(cfg.scale*100) + "%"); }
+  }else if(up || down){
+    if(up){ setCfg({fs: Math.min(1.6, +(cfg.fs + 0.15).toFixed(2))}); did.push("texto " + Math.round(cfg.fs*100) + "%"); }
+    else  { setCfg({fs: Math.max(0.7, +(cfg.fs - 0.15).toFixed(2))}); did.push("texto " + Math.round(cfg.fs*100) + "%"); }
+  }
+
+  if(did.length){ setCmdOut("✓ " + did.join(" · ")); say(did.join(" · ")); }
+  else setCmdOut("não entendi — " + CMD_HINT);
+}
+
+B("cmdGo", () => applyCommand(document.getElementById("cmdBox").value));
+B("cmdFromText", () => {
+  const v = text.trim();
+  const box = document.getElementById("cmdBox");
+  if(box) box.value = v;
+  applyCommand(v);
+});
+(function(){
+  const box = document.getElementById("cmdBox");
+  if(box) box.addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); applyCommand(box.value); } });
+})();
+
+/* ================================================================
+   12. INÍCIO
    ================================================================ */
 syncCfgUI();
 fit();
