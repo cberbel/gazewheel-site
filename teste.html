@@ -126,6 +126,9 @@
   .mini{background:var(--panel2); border-radius:10px; height:46px; min-width:56px; font-size:19px; font-weight:700; padding:0 14px;}
   .mini:hover{background:#33436a;}
   .mini.on{background:var(--accent); color:#0f1420;}
+  #topWords{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 4px;}
+  #topWords span{background:var(--panel2); border-radius:999px; padding:6px 14px; font-size:16px; color:#cddaf0;}
+  #topWords span b{color:var(--accent); font-weight:700; margin-left:6px; font-size:14px;}
   #phraseGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:10px; margin-bottom:14px;}
   .phrase{background:var(--panel2); border-radius:14px; padding:16px 18px; font-size:20px; text-align:left; min-height:66px; line-height:1.3;}
   .phrase:hover{background:#33436a;}
@@ -202,6 +205,8 @@
     <button class="mini tgt" id="learnImp"><span class="fill"></span>⬆ Import learning</button>
   </div>
   <div class="row"><label id="learnStats"></label></div>
+  <div class="row" style="display:block"><label>Your most used words</label>
+    <div id="topWords"></div></div>
   <button class="close tgt" data-close><span class="fill"></span>Close</button>
 </div></div>
 
@@ -241,6 +246,8 @@
     <button class="mini tgt" id="rateUp"><span class="fill"></span>+</button></div>
   <div class="row"><label>Voice</label>
     <button class="mini tgt" id="cfgVoice"><span class="fill"></span>—</button></div>
+  <div class="row"><label>Teach it your writing style<br><span style="font-size:14.5px;color:var(--dim)">paste your texts or load files — it learns your words</span></label>
+    <button class="mini tgt" id="cfgTeach"><span class="fill"></span>🧠 Open</button></div>
   <button class="close tgt" data-close><span class="fill"></span>Close</button>
 </div></div>
 
@@ -985,6 +992,28 @@ function openModal(id){ closeModals(); document.getElementById(id).classList.add
 document.querySelectorAll("[data-close]").forEach(b => bind(b, closeModals));
 addEventListener("keydown", e => { if(e.key === "Escape") closeModals(); });
 
+/* as palavras que mais definem o estilo da pessoa — prova visível do aprendizado */
+function renderTopWords(){
+  const box = document.getElementById("topWords");
+  if(!box) return;
+  const ks = Object.keys(LEARN).sort((a,b) => used(b) - used(a)).slice(0, 24);
+  box.innerHTML = "";
+  if(!ks.length){
+    const e = document.createElement("span");
+    e.textContent = "nothing yet — paste a text above and the words you use most will show up here";
+    box.appendChild(e);
+    return;
+  }
+  for(const w of ks){
+    const e = document.createElement("span");
+    e.textContent = w;
+    const n = document.createElement("b");
+    n.textContent = Math.round(used(w));
+    e.appendChild(n);
+    box.appendChild(e);
+  }
+}
+
 function syncCfgUI(){
   const set = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
   set("cfgDwell", cfg.dwell ? "on" : "off");
@@ -1005,6 +1034,7 @@ function syncCfgUI(){
   const stats = document.getElementById("learnStats");
   if(stats) stats.textContent = Object.keys(LEARN).length + " of your words learned · " +
     Object.keys(NEXT).length + " chains · " + ALL.length + " words in the dictionary";
+  renderTopWords();
 }
 function setCfg(patch){ Object.assign(cfg, patch); save(K.cfg, cfg); syncCfgUI(); fit(); render(); }
 
@@ -1016,6 +1046,7 @@ B("talkClose", () => document.getElementById("talkOverlay").classList.remove("on
 B("btnPhrases",() => { renderPhrases(); openModal("mPhrases"); });
 B("btnCfg",    () => { syncCfgUI(); openModal("mCfg"); });
 B("btnLearn",  () => { syncCfgUI(); openModal("mLearn"); });
+B("cfgTeach",  () => { syncCfgUI(); openModal("mLearn"); });
 B("btnClear",  () => { pushUndo(); text = ""; caret = 0; page = 0; render(); say("text cleared — undo is on the wheel"); });
 B("btnPrev",   () => moveWord(-1));
 B("btnNext",   () => moveWord(1));
