@@ -22,6 +22,11 @@
     border:1px solid var(--line);border-radius:999px;width:46px;height:46px;font-size:20px;cursor:pointer;
     font-family:inherit;line-height:1;}
   .scheme:hover{filter:brightness(1.12);}
+  .topnav{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-bottom:28px;padding-right:56px;}
+  .topnav a{color:var(--dim);text-decoration:none;font-weight:600;font-size:16px;}
+  .topnav a:hover{color:var(--text);}
+  .topnav a.on{color:var(--accent);}
+  @media(max-width:600px){.topnav{gap:13px;padding-right:52px;} .topnav a{font-size:15px;}}
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,Arial,sans-serif;line-height:1.55;}
   .wrap{max-width:880px;margin:0 auto;padding:44px 22px 70px;}
@@ -48,7 +53,12 @@
 <button id="schemeBtn" class="scheme" title="Light / dark" aria-label="Switch between light and dark background">☀</button>
 <div class="wrap">
 
-  <a class="back" href="index.html">← GazeWheel</a>
+  <nav class="topnav">
+    <a href="index.html">Keyboard</a>
+    <a href="feedback.html">Suggestions &amp; versions</a>
+    <a class="on" href="devices.html">Devices</a>
+    <a href="support.html">Support</a>
+  </nav>
   <h1>Devices that move the cursor for you</h1>
   <p class="lede">GazeWheel only needs one thing from your equipment: cursor movement. This is the
   equipment side — from built-in, zero-cost options to dedicated assistive eye trackers. Start with
