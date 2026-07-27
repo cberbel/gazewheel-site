@@ -40,6 +40,13 @@
   .btn:hover{filter:brightness(1.12);}
   ol{margin:0 0 13px 22px;}
   ol li{font-size:17px;margin-bottom:9px;}
+  .hist-intro{color:var(--dim);font-size:16.5px;margin-bottom:16px;}
+  .hist{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px;}
+  .hist h3{font-size:17px;color:var(--accent);letter-spacing:.4px;margin:22px 0 8px;}
+  .hist h3:first-child{margin-top:0;}
+  .hist ul{list-style:none;margin:0;}
+  .hist li{position:relative;padding-left:20px;margin-bottom:9px;font-size:16.5px;color:var(--soft);}
+  .hist li::before{content:"";position:absolute;left:0;top:9px;width:7px;height:7px;border-radius:50%;background:var(--accent);}
   .note{background:var(--panel);border-left:4px solid var(--amber);border-radius:0 12px 12px 0;padding:16px 20px;color:var(--soft);font-size:16px;margin-top:8px;}
   footer{border-top:1px solid var(--line);margin-top:40px;padding-top:22px;color:var(--dim);font-size:15px;text-align:center;}
   footer a{color:var(--accent);text-decoration:none;font-weight:700;}
@@ -77,6 +84,41 @@
   <p>Before writing, it is worth looking — someone may have raised the same thing, and adding your case
   to an existing thread makes it land faster.</p>
   <p><a class="btn alt" href="https://github.com/cberbel/gazewheel-site/issues" rel="noopener">See open suggestions →</a></p>
+
+  <h2>What has changed so far</h2>
+  <p class="hist-intro">The keyboard carries no version number — it changes when someone says it
+  should. Newest first.</p>
+
+  <div class="hist">
+    <h3>26 July 2026</h3>
+    <ul>
+      <li><b>One keyboard, two languages</b> — English and Portuguese, same engine. The older, simpler
+      model was retired.</li>
+      <li><b>Light background</b>, alongside the dark one and high contrast. And colours: blue, red,
+      green, purple, amber.</li>
+      <li><b>Ask in your own words</b> — type “make it red”, “bigger letters” or “speak slower” in
+      Settings and it does it.</li>
+      <li><b>Teach</b> is now also reachable from Settings, and shows your most used words.</li>
+      <li>The wheel took the shape of the logo, and the arc doubles as the page indicator.</li>
+    </ul>
+
+    <h3>25 July 2026 — first day online</h3>
+    <ul>
+      <li><b>Published at gazewheel.org</b> — free, in the browser, nothing to install.</li>
+      <li><b>Teach learns from files</b>, several at once; a backup file is merged with what you
+      already have instead of replacing it.</li>
+      <li><b>An English keyboard</b>: keys, dictionary, word chains, voice and interface.</li>
+    </ul>
+
+    <h3>Before that</h3>
+    <ul>
+      <li><b>The wheel itself</b>: the whole alphabet fixed on the outer ring, the likely letters large
+      on the inner ring, space and delete in the middle, prediction that learns your words.</li>
+      <li><b>Then the version made for conversation</b>: the sentence spoken the moment you close it,
+      a chime that says <i>wait, I'm typing</i>, conversation mode facing the other person, a real
+      cursor to fix a word mid-text, saved phrases, dwell selection and Teach.</li>
+    </ul>
+  </div>
 
   <h2>What helps most</h2>
   <ol>
