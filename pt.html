@@ -25,6 +25,42 @@
   body[data-theme="green"] { --accent:#5ad48a; --green:#7fd8ff; }
   body[data-theme="purple"]{ --accent:#b18cff; --green:#6bd6ff; }
   body[data-theme="amber"] { --accent:#ffc247; --green:#ff9f6b; }
+  /* fundo claro — luz ambiente forte, ou quem simplesmente enxerga melhor assim */
+  body.light{
+    --bg:#eff3fa; --panel:#ffffff; --panel2:#e4ebf7; --text:#111827; --dim:#5b6a86;
+    --accent:#0a63c9; --green:#0f7a35; --amber:#8a5a00; --red:#c0392b;
+    --wedge:#dae3f3; --wedge2:#eaf0fb; --hub:#c9d6ee; --rest:#ffffff;
+  }
+  body.light[data-theme="red"]   { --accent:#c62828; --green:#b25a00; }
+  body.light[data-theme="green"] { --accent:#0f7a35; --green:#0b6ba8; }
+  body.light[data-theme="purple"]{ --accent:#6a3fc0; --green:#0b6ba8; }
+  body.light[data-theme="amber"] { --accent:#9a6400; --green:#b25a00; }
+  body.light #tail .prev{color:#55658a;}
+  body.light #tail.empty::before{color:#a7b3c9;}
+  body.light .wedge:hover{fill:#c3d4ef;}
+  body.light .quad:hover{fill:#b7c9e8;}
+  body.light .quad.danger{fill:#f7d3da;}
+  body.light .quad.danger:hover{fill:#eeb0bd;}
+  body.light .outerLbl{fill:#33445f;}
+  body.light .sub{fill:#3b4d70;}
+  body.light .restTxt{fill:#97a3ba;}
+  body.light .tgt.flash{color:#fff !important;}
+  body.light .word:hover{background:#d3e0f5;}
+  body.light #btnFix.ativo{color:#fff;}
+  body.light.fix #out .w:hover{color:#fff;}
+  body.light button.ctrl:hover{background:#d3dcee;}
+  body.light button.ctrl.big{background:#dbe8fb; border-color:#a7c4ea;}
+  body.light button.ctrl.big:hover{background:#c8dcf8;}
+  body.light button.ctrl.att{background:#fdf0cd;}
+  body.light button.ctrl.att:hover{background:#f8e2a8;}
+  body.light #talkOverlay{background:#fff;}
+  body.light #talkText.vazio{color:#a7b3c9;}
+  body.light .modal{background:rgba(15,20,32,.45);}
+  body.light .row{border-bottom-color:#d8e0ee;}
+  body.light .mini:hover{background:#d3dcee;}
+  body.light .mini.on{color:#fff;}
+  body.light #cmdBox{border-color:#c2cee5;}
+  body.light #topWords span{color:#35486a;}
   body.hc{
     --bg:#000; --panel:#0a0a0a; --panel2:#141414; --text:#fff; --dim:#c8c8c8;
     --wedge:#333; --wedge2:#1c1c1c; --hub:#3a3a3a; --rest:#000; --accent:#ffe600; --green:#00e676;
@@ -256,6 +292,8 @@
     <button class="mini tgt" id="cfgN"><span class="fill"></span>—</button></div>
   <div class="row"><label>Mostrar o alfabeto completo por fora</label>
     <button class="mini tgt" id="cfgOuter"><span class="fill"></span>—</button></div>
+  <div class="row"><label>Fundo claro</label>
+    <button class="mini tgt" id="cfgLight"><span class="fill"></span>—</button></div>
   <div class="row"><label>Alto contraste</label>
     <button class="mini tgt" id="cfgHC"><span class="fill"></span>—</button></div>
   <div class="row"><label>Falar sozinho ao fechar a frase</label>
@@ -496,7 +534,7 @@ function prune(){
    3. ESTADO E PREDIÇÃO
    ================================================================ */
 const DEF_CFG = {dwell:false, dwellMs:900, scale:0.92, fs:1, order:"alpha", innerN:0,
-                 outer:true, hc:false, rate:0.95, voice:"", autoSpeak:true, theme:"blue"};
+                 outer:true, hc:false, light:false, rate:0.95, voice:"", autoSpeak:true, theme:"blue"};
 const THEMES = ["blue","red","green","purple","amber"];
 const THEME_PT = {blue:"azul", red:"vermelho", green:"verde", purple:"roxo", amber:"âmbar"};
 let cfg = Object.assign({}, DEF_CFG, load(K.cfg, {}));
@@ -1014,6 +1052,9 @@ function syncCfgUI(){
   set("cfgN", cfg.innerN ? cfg.innerN + " letras" : "automático");
   set("cfgOuter", cfg.outer ? "sim" : "não");
   set("cfgHC", cfg.hc ? "ligado" : "desligado");
+  set("cfgLight", cfg.light ? "ligado" : "desligado");
+  document.body.classList.toggle("light", !!cfg.light);
+  const lb = document.getElementById("cfgLight"); if(lb) lb.classList.toggle("on", !!cfg.light);
   set("cfgTheme", THEME_PT[cfg.theme] || "azul");
   document.body.dataset.theme = cfg.theme || "blue";
   set("cfgAuto", cfg.autoSpeak ? "sim" : "não");
@@ -1087,7 +1128,9 @@ B("fsUp",     () => setCfg({fs: Math.min(1.6, +(cfg.fs + 0.1).toFixed(2))}));
 B("cfgOrder", () => setCfg({order: cfg.order === "alpha" ? "prob" : "alpha"}));
 B("cfgN",     () => { const seq = [0,4,5,6,8]; setCfg({innerN: seq[(seq.indexOf(cfg.innerN)+1) % seq.length]}); });
 B("cfgOuter", () => setCfg({outer: !cfg.outer}));
-B("cfgHC",    () => setCfg({hc: !cfg.hc}));
+/* claro e alto contraste se excluem: são dois extremos opostos */
+B("cfgHC",    () => setCfg({hc: !cfg.hc, light: false}));
+B("cfgLight", () => setCfg({light: !cfg.light, hc: false}));
 B("cfgTheme", () => setCfg({theme: THEMES[(THEMES.indexOf(cfg.theme || "blue") + 1) % THEMES.length]}));
 B("cfgAuto",  () => setCfg({autoSpeak: !cfg.autoSpeak}));
 B("rateDown", () => setCfg({rate: Math.max(0.5, +(cfg.rate - 0.05).toFixed(2))}));
@@ -1236,9 +1279,14 @@ function applyCommand(raw){
   for(const k in COLORS){
     if(COLORS[k].some(x => s.indexOf(x) >= 0)){ setCfg({theme:k}); did.push("cores: " + THEME_PT[k]); break; }
   }
+  if(has("fundo claro","fundo branco","light background","white background","claro","branco","white")){
+    setCfg({light:true, hc:false}); did.push("fundo claro");
+  }else if(has("fundo escuro","dark background","escuro","dark")){
+    setCfg({light:false}); did.push("fundo escuro");
+  }
   if(has("contrast","contraste")){
     const v = off ? false : (on ? true : !cfg.hc);
-    setCfg({hc:v}); did.push("alto contraste " + (v ? "ligado" : "desligado"));
+    setCfg({hc:v, light: v ? false : cfg.light}); did.push("alto contraste " + (v ? "ligado" : "desligado"));
   }
   if(has("dwell","permanên","permanenc","parando")){
     if(faster || down){ setCfg({dwellMs: Math.max(400, cfg.dwellMs - 200)}); did.push("permanência " + (cfg.dwellMs/1000).toFixed(1) + "s"); }

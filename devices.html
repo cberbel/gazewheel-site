@@ -7,7 +7,21 @@
 <meta name="description" content="Eye trackers, head mice and free software that move the cursor for you — the equipment side of typing with GazeWheel: Tobii Dynavox, Irisbond, EyeTech, built-in OS eye tracking and free webcam options.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%2326324c' stroke-width='9'/%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%234da3ff' stroke-width='9' stroke-dasharray='66 223' stroke-dashoffset='-140' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='50' r='29' fill='none' stroke='%232c3a5c' stroke-width='8'/%3E%3Ccircle cx='50' cy='50' r='12' fill='%234da3ff'/%3E%3Cpath d='M56 48 v30 l8-7 4.8 10.6 6.2-2.8 -4.8-10.6 11-1 z' fill='%23fff' stroke='%230f1420' stroke-width='3'/%3E%3C/svg%3E">
 <style>
-  :root{--bg:#0f1420;--panel:#1a2233;--panel2:#232e46;--text:#f2f6ff;--dim:#8fa0bf;--accent:#4da3ff;--green:#59c96b;--amber:#ffd166;}
+  :root{--bg:#0f1420;--panel:#1a2233;--panel2:#232e46;--text:#f2f6ff;--dim:#8fa0bf;--accent:#4da3ff;
+        --green:#59c96b;--amber:#ffd166;--line:#2a3550;--soft:#cddaf0;--onAccent:#0f1420;}
+  /* fundo claro: escolha da pessoa, ou o que o sistema dela já pede */
+  :root[data-scheme="light"]{
+        --bg:#f7f9fd;--panel:#ffffff;--panel2:#e9f0f9;--text:#111827;--dim:#55637f;--accent:#0a63c9;
+        --green:#0f7a35;--amber:#8a5a00;--line:#dbe3ef;--soft:#33405c;--onAccent:#ffffff;}
+  @media (prefers-color-scheme: light){
+    :root:not([data-scheme="dark"]){
+        --bg:#f7f9fd;--panel:#ffffff;--panel2:#e9f0f9;--text:#111827;--dim:#55637f;--accent:#0a63c9;
+        --green:#0f7a35;--amber:#8a5a00;--line:#dbe3ef;--soft:#33405c;--onAccent:#ffffff;}
+  }
+  .scheme{position:fixed;top:14px;right:14px;z-index:20;background:var(--panel2);color:var(--text);
+    border:1px solid var(--line);border-radius:999px;width:46px;height:46px;font-size:20px;cursor:pointer;
+    font-family:inherit;line-height:1;}
+  .scheme:hover{filter:brightness(1.12);}
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,Arial,sans-serif;line-height:1.55;}
   .wrap{max-width:880px;margin:0 auto;padding:44px 22px 70px;}
@@ -16,20 +30,22 @@
   .lede{color:var(--dim);font-size:19px;max-width:680px;margin-bottom:34px;}
   h2{font-size:23px;margin:34px 0 6px;}
   .tier{color:var(--dim);font-size:16px;margin-bottom:14px;}
-  .item{background:var(--panel);border:1px solid #2a3550;border-radius:14px;padding:18px 20px;margin-bottom:12px;}
+  .item{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:12px;}
   .item h3{font-size:18.5px;margin-bottom:4px;}
   .item h3 a{color:var(--accent);text-decoration:none;}
   .item h3 a:hover{text-decoration:underline;}
-  .item p{color:#cddaf0;font-size:16.5px;margin:0;}
+  .item p{color:var(--soft);font-size:16.5px;margin:0;}
   .badge{display:inline-block;font-size:12.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:3px 9px;border-radius:999px;margin-left:8px;vertical-align:2px;}
   .badge.free{background:rgba(89,201,107,.16);color:var(--green);}
   .badge.builtin{background:rgba(77,163,255,.16);color:var(--accent);}
-  .note{background:var(--panel);border-left:4px solid var(--amber);border-radius:0 12px 12px 0;padding:16px 20px;color:#cddaf0;font-size:16px;margin-top:34px;}
-  footer{border-top:1px solid #2a3550;margin-top:40px;padding-top:22px;color:var(--dim);font-size:15px;text-align:center;}
+  .note{background:var(--panel);border-left:4px solid var(--amber);border-radius:0 12px 12px 0;padding:16px 20px;color:var(--soft);font-size:16px;margin-top:34px;}
+  footer{border-top:1px solid var(--line);margin-top:40px;padding-top:22px;color:var(--dim);font-size:15px;text-align:center;}
   footer a{color:var(--accent);text-decoration:none;font-weight:700;}
 </style>
+<script>try{var s=localStorage.getItem("gw.scheme");if(s)document.documentElement.setAttribute("data-scheme",s);}catch(e){}</script>
 </head>
 <body>
+<button id="schemeBtn" class="scheme" title="Light / dark" aria-label="Switch between light and dark background">☀</button>
 <div class="wrap">
 
   <a class="back" href="index.html">← GazeWheel</a>
@@ -120,5 +136,20 @@
   </footer>
 
 </div>
+<script>
+(function(){
+  var r = document.documentElement, b = document.getElementById("schemeBtn");
+  function cur(){ return r.getAttribute("data-scheme") ||
+    (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"); }
+  function paint(){ b.textContent = cur() === "light" ? "☾" : "☀"; }
+  paint();
+  b.addEventListener("click", function(){
+    var n = cur() === "light" ? "dark" : "light";
+    r.setAttribute("data-scheme", n);
+    try{ localStorage.setItem("gw.scheme", n); }catch(e){}
+    paint();
+  });
+})();
+</script>
 </body>
 </html>

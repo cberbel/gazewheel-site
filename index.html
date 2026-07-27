@@ -7,8 +7,22 @@
 <meta name="description" content="GazeWheel is a free round on-screen keyboard for people who cannot speak and type with the cursor instead of their hands — eye tracker, trackball, head mouse or one finger. Word prediction, built-in voice, learning, no install.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%2326324c' stroke-width='9'/%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%234da3ff' stroke-width='9' stroke-dasharray='66 223' stroke-dashoffset='-140' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='50' r='29' fill='none' stroke='%232c3a5c' stroke-width='8'/%3E%3Ccircle cx='50' cy='50' r='12' fill='%234da3ff'/%3E%3Cpath d='M56 48 v30 l8-7 4.8 10.6 6.2-2.8 -4.8-10.6 11-1 z' fill='%23fff' stroke='%230f1420' stroke-width='3'/%3E%3C/svg%3E">
 <style>
-  :root{--bg:#0f1420;--panel:#1a2233;--panel2:#232e46;--text:#f2f6ff;--dim:#8fa0bf;--accent:#4da3ff;--green:#59c96b;--amber:#ffd166;}
+  :root{--bg:#0f1420;--panel:#1a2233;--panel2:#232e46;--text:#f2f6ff;--dim:#8fa0bf;--accent:#4da3ff;
+        --green:#59c96b;--amber:#ffd166;--line:#2a3550;--soft:#cddaf0;--onAccent:#0f1420;}
+  /* fundo claro: escolha da pessoa, ou o que o sistema dela já pede */
+  .light-vars, :root[data-scheme="light"]{
+        --bg:#f7f9fd;--panel:#ffffff;--panel2:#e9f0f9;--text:#111827;--dim:#55637f;--accent:#0a63c9;
+        --green:#0f7a35;--amber:#8a5a00;--line:#dbe3ef;--soft:#33405c;--onAccent:#ffffff;}
+  @media (prefers-color-scheme: light){
+    :root:not([data-scheme="dark"]){
+        --bg:#f7f9fd;--panel:#ffffff;--panel2:#e9f0f9;--text:#111827;--dim:#55637f;--accent:#0a63c9;
+        --green:#0f7a35;--amber:#8a5a00;--line:#dbe3ef;--soft:#33405c;--onAccent:#ffffff;}
+  }
   *{box-sizing:border-box;margin:0;padding:0;}
+  .scheme{position:fixed;top:14px;right:14px;z-index:20;background:var(--panel2);color:var(--text);
+    border:1px solid var(--line);border-radius:999px;width:46px;height:46px;font-size:20px;cursor:pointer;
+    font-family:inherit;line-height:1;}
+  .scheme:hover{filter:brightness(1.12);}
   body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,Arial,sans-serif;line-height:1.55;}
   .wrap{max-width:880px;margin:0 auto;padding:44px 22px 70px;}
   header{text-align:center;margin-bottom:34px;}
@@ -19,7 +33,7 @@
   h1{font-size:38px;letter-spacing:-.6px;margin-bottom:14px;line-height:1.18;}
   .cards{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:30px 0 10px;}
   @media(max-width:720px){.cards{grid-template-columns:1fr;} h1{font-size:29px;} .statement{font-size:22px;}}
-  a.card{display:block;background:var(--panel);border:2px solid #2a3550;border-radius:18px;
+  a.card{display:block;background:var(--panel);border:2px solid var(--line);border-radius:18px;
     padding:26px 24px;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s;}
   a.card:hover{border-color:var(--accent);transform:translateY(-2px);}
   a.card .tag{display:inline-block;font-size:13px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:4px 10px;border-radius:999px;margin-bottom:12px;}
@@ -34,26 +48,26 @@
   .statement{text-align:center;padding:44px 10px 34px;font-size:27px;line-height:1.4;font-weight:600;max-width:720px;margin:0 auto;}
   .statement .hi{color:var(--accent);}
   .statement small{display:block;margin-top:14px;font-size:18px;font-weight:400;color:var(--dim);}
-  .share{background:var(--panel);border:2px solid #2a3550;border-radius:18px;padding:30px 26px;text-align:center;}
+  .share{background:var(--panel);border:2px solid var(--line);border-radius:18px;padding:30px 26px;text-align:center;}
   .share h3{font-size:24px;}
-  .share p{color:#cddaf0;max-width:620px;margin:0 auto 18px;}
+  .share p{color:var(--soft);max-width:620px;margin:0 auto 18px;}
   .btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
   .btn{display:inline-block;padding:13px 22px;border-radius:12px;font-size:17px;font-weight:700;text-decoration:none;cursor:pointer;border:0;font-family:inherit;}
-  .btn.wa{background:var(--green);color:#0f1420;}
+  .btn.wa{background:var(--green);color:var(--onAccent);}
   .btn.cp{background:var(--panel2);color:var(--text);}
   .btn:hover{filter:brightness(1.1);}
   ul.feat{list-style:none;margin:0 0 13px;}
   ul.feat li{position:relative;padding-left:26px;margin-bottom:10px;font-size:17.5px;}
   ul.feat li::before{content:"";position:absolute;left:0;top:9px;width:10px;height:10px;border-radius:50%;background:var(--accent);}
-  .note{background:var(--panel);border-left:4px solid var(--accent);border-radius:0 12px 12px 0;padding:16px 20px;color:#cddaf0;font-size:16.5px;}
-  .shot{display:block;width:100%;max-width:640px;margin:18px auto 6px;border-radius:14px;border:1px solid #2a3550;}
-  .photo{display:block;width:100%;max-width:760px;margin:0 auto 6px;border-radius:14px;border:1px solid #2a3550;}
+  .note{background:var(--panel);border-left:4px solid var(--accent);border-radius:0 12px 12px 0;padding:16px 20px;color:var(--soft);font-size:16.5px;}
+  .shot{display:block;width:100%;max-width:640px;margin:18px auto 6px;border-radius:14px;border:1px solid var(--line);}
+  .photo{display:block;width:100%;max-width:760px;margin:0 auto 6px;border-radius:14px;border:1px solid var(--line);}
   .caption{text-align:center;color:var(--dim);font-size:14.5px;margin-bottom:0;}
-  .donate{background:linear-gradient(160deg,#1a2233,#232e46);border:2px solid #2a3550;border-radius:18px;padding:30px 26px;text-align:center;}
+  .donate{background:linear-gradient(160deg,var(--panel),var(--panel2));border:2px solid var(--line);border-radius:18px;padding:30px 26px;text-align:center;}
   .donate h3{font-size:24px;}
-  .donate p{color:#cddaf0;max-width:640px;margin:0 auto 16px;}
-  .donate a.btn{background:var(--amber);color:#0f1420;}
-  footer{border-top:1px solid #2a3550;padding-top:22px;color:var(--dim);font-size:15px;text-align:center;}
+  .donate p{color:var(--soft);max-width:640px;margin:0 auto 16px;}
+  .donate a.btn{background:var(--amber);color:var(--onAccent);}
+  footer{border-top:1px solid var(--line);padding-top:22px;color:var(--dim);font-size:15px;text-align:center;}
   .fs-link{display:inline-flex;align-items:center;gap:12px;margin-top:18px;text-decoration:none;color:inherit;}
   .fs-stack{display:flex;flex-direction:column;align-items:center;gap:2px;}
   .fs-stack i{display:block;border-radius:2px;}
@@ -65,8 +79,10 @@
   .fs-word i{font-style:normal;font-weight:400;font-size:18px;letter-spacing:.01em;}
   code{background:var(--panel2);padding:2px 7px;border-radius:6px;font-size:15px;}
 </style>
+<script>try{var s=localStorage.getItem("gw.scheme");if(s)document.documentElement.setAttribute("data-scheme",s);}catch(e){}</script>
 </head>
 <body>
+<button id="schemeBtn" class="scheme" title="Light / dark" aria-label="Switch between light and dark background">☀</button>
 <div class="wrap">
 
   <!-- SCREEN 1: brand + use it -->
@@ -87,7 +103,7 @@
     </svg>
     <div class="brand"><span class="gaze">Gaze</span>Wheel</div>
     <p class="slogan">Gazetyping is easier.</p>
-    <h1>A round keyboard for people<br>who type with the cursor</h1>
+    <h1>A round keyboard<br>for typing with the cursor</h1>
 
     <div class="cards">
       <a class="card teste" href="en.html">
@@ -213,6 +229,21 @@
 
 </div>
 <script>
+/* fundo claro ou escuro: começa no que o sistema da pessoa pede e fica salvo se ela trocar */
+(function(){
+  var r = document.documentElement, b = document.getElementById("schemeBtn");
+  function cur(){ return r.getAttribute("data-scheme") ||
+    (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"); }
+  function paint(){ b.textContent = cur() === "light" ? "☾" : "☀"; }
+  paint();
+  b.addEventListener("click", function(){
+    var n = cur() === "light" ? "dark" : "light";
+    r.setAttribute("data-scheme", n);
+    try{ localStorage.setItem("gw.scheme", n); }catch(e){}
+    paint();
+  });
+})();
+
 document.getElementById("copyBtn").addEventListener("click", function(){
   navigator.clipboard.writeText("https://www.gazewheel.org").then(() => {
     this.textContent = "Link copied ✓";
