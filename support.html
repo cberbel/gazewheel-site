@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GazeWheel — support the project</title>
+<meta name="description" content="Support GazeWheel and Free School: tell us how and how much you would like to help, and we get back to you.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%2326324c' stroke-width='9'/%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%234da3ff' stroke-width='9' stroke-dasharray='66 223' stroke-dashoffset='-140' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='50' r='29' fill='none' stroke='%232c3a5c' stroke-width='8'/%3E%3Ccircle cx='50' cy='50' r='12' fill='%234da3ff'/%3E%3Cpath d='M56 48 v30 l8-7 4.8 10.6 6.2-2.8 -4.8-10.6 11-1 z' fill='%23fff' stroke='%230f1420' stroke-width='3'/%3E%3C/svg%3E">
+<style>
+  :root{--bg:#0f1420;--panel:#1a2233;--panel2:#232e46;--text:#f2f6ff;--dim:#8fa0bf;--accent:#4da3ff;
+        --green:#59c96b;--amber:#ffd166;--orange:#ff8a3d;--line:#2a3550;--soft:#cddaf0;--onAccent:#0f1420;}
+  /* fundo claro: escolha da pessoa, ou o que o sistema dela já pede */
+  :root[data-scheme="light"]{
+        --bg:#e9f1fc;--panel:#ffffff;--panel2:#d7e6f9;--text:#111827;--dim:#4d5d7a;--accent:#0a63c9;
+        --green:#0f7a35;--amber:#8a5a00;--orange:#c2500a;--line:#c9dbf1;--soft:#2f3d59;--onAccent:#ffffff;}
+  @media (prefers-color-scheme: light){
+    :root:not([data-scheme="dark"]){
+        --bg:#e9f1fc;--panel:#ffffff;--panel2:#d7e6f9;--text:#111827;--dim:#4d5d7a;--accent:#0a63c9;
+        --green:#0f7a35;--amber:#8a5a00;--orange:#c2500a;--line:#c9dbf1;--soft:#2f3d59;--onAccent:#ffffff;}
+  }
+  .scheme{position:fixed;top:14px;right:14px;z-index:20;background:var(--panel2);color:var(--text);
+    border:1px solid var(--line);border-radius:999px;width:46px;height:46px;font-size:20px;cursor:pointer;
+    font-family:inherit;line-height:1;}
+  .scheme:hover{filter:brightness(1.12);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,Arial,sans-serif;line-height:1.55;}
+  .wrap{max-width:760px;margin:0 auto;padding:44px 22px 70px;}
+  .back{display:inline-block;color:var(--accent);text-decoration:none;font-weight:700;margin-bottom:26px;font-size:17px;}
+  h1{font-size:34px;letter-spacing:-.5px;margin-bottom:12px;line-height:1.2;}
+  .lede{color:var(--dim);font-size:19px;margin-bottom:12px;}
+  .lang{color:var(--amber);font-size:16.5px;font-style:italic;margin-bottom:30px;}
+  .card{background:var(--panel);border:2px solid var(--line);border-radius:18px;padding:26px 24px;margin-bottom:18px;}
+  fieldset{border:0;margin-bottom:22px;}
+  legend{font-size:19px;font-weight:700;margin-bottom:10px;padding:0;}
+  .hint{color:var(--dim);font-size:15.5px;margin-bottom:12px;}
+  label.opt{display:flex;align-items:flex-start;gap:11px;background:var(--panel2);border-radius:12px;
+    padding:13px 16px;margin-bottom:9px;cursor:pointer;font-size:17px;}
+  label.opt:hover{filter:brightness(1.06);}
+  label.opt input{margin-top:5px;width:19px;height:19px;accent-color:var(--orange);flex:0 0 auto;}
+  .field{margin-bottom:15px;}
+  .field label{display:block;font-size:16.5px;font-weight:600;margin-bottom:6px;}
+  input[type=text], input[type=email], textarea{
+    width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);
+    border-radius:12px;padding:13px 15px;font-size:17px;font-family:inherit;}
+  textarea{min-height:96px;resize:vertical;}
+  input:focus, textarea:focus{outline:2px solid var(--orange);outline-offset:1px;}
+  .req{color:var(--orange);}
+  .btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;}
+  .btn{display:inline-block;padding:15px 26px;border-radius:12px;font-size:17.5px;font-weight:700;
+    text-decoration:none;cursor:pointer;border:0;font-family:inherit;}
+  .btn.main{background:var(--orange);color:var(--onAccent);}
+  .btn.alt{background:var(--panel2);color:var(--text);}
+  .btn:hover{filter:brightness(1.1);}
+  #msg{margin-top:14px;font-size:16.5px;color:var(--soft);min-height:24px;}
+  .note{background:var(--panel);border-left:4px solid var(--orange);border-radius:0 12px 12px 0;
+    padding:16px 20px;color:var(--soft);font-size:16px;margin-top:20px;}
+  footer{border-top:1px solid var(--line);margin-top:40px;padding-top:22px;color:var(--dim);font-size:15px;text-align:center;}
+  footer a{color:var(--accent);text-decoration:none;font-weight:700;}
+</style>
+<script>try{var s=localStorage.getItem("gw.scheme");if(s)document.documentElement.setAttribute("data-scheme",s);}catch(e){}</script>
+</head>
+<body>
+<button id="schemeBtn" class="scheme" title="Light / dark" aria-label="Switch between light and dark background">☀</button>
+<div class="wrap">
+
+  <a class="back" href="index.html">← GazeWheel</a>
+  <h1>Support the project</h1>
+  <p class="lede">GazeWheel is free and stays free. What donations pay for is the rest of the work at
+  Free School: scholarships in early childhood education, and projects like this one — built for people
+  who are usually left to buy their way out of the problem.</p>
+  <p class="lang">Pode escrever em português — respondemos nos dois idiomas.</p>
+
+  <div class="card">
+    <form id="f" onsubmit="return false;">
+
+      <fieldset>
+        <legend>How would you like to help?</legend>
+        <p class="hint">Pick as many as apply.</p>
+        <label class="opt"><input type="checkbox" name="how" value="A monthly amount"> A monthly amount</label>
+        <label class="opt"><input type="checkbox" name="how" value="A one-time gift"> A one-time gift</label>
+        <label class="opt"><input type="checkbox" name="how" value="Equipment or services (a device, hosting, translation)"> Equipment or services — a device, hosting, translation</label>
+        <label class="opt"><input type="checkbox" name="how" value="An introduction to someone or a company"> An introduction to someone, or to a company</label>
+        <label class="opt"><input type="checkbox" name="how" value="Something else"> Something else</label>
+      </fieldset>
+
+      <div class="field">
+        <label for="amount">How much do you have in mind? <span class="hint">(optional — a range is fine)</span></label>
+        <input type="text" id="amount" placeholder="e.g. R$ 100 per month, or a one-time US$ 50">
+      </div>
+
+      <div class="field">
+        <label for="name">Your name <span class="req">*</span></label>
+        <input type="text" id="name" autocomplete="name">
+      </div>
+
+      <div class="field">
+        <label for="email">E-mail <span class="req">*</span></label>
+        <input type="email" id="email" autocomplete="email">
+      </div>
+
+      <div class="field">
+        <label for="phone">WhatsApp or phone <span class="hint">(optional)</span></label>
+        <input type="text" id="phone" autocomplete="tel">
+      </div>
+
+      <div class="field">
+        <label for="note">Anything you want to say <span class="hint">(optional)</span></label>
+        <textarea id="note" placeholder="Why this matters to you, a question, a condition — anything."></textarea>
+      </div>
+
+      <div class="btns">
+        <button class="btn main" id="sendMail" type="button">Send by e-mail</button>
+        <button class="btn alt" id="sendWa" type="button">Send on WhatsApp</button>
+        <button class="btn alt" id="copyIt" type="button">Copy it instead</button>
+      </div>
+      <div id="msg" aria-live="polite"></div>
+    </form>
+  </div>
+
+  <p class="note"><b>This page has no database.</b> Nothing you write here is stored on the site or sent
+  anywhere on its own — pressing a button opens your e-mail or WhatsApp with the message already written,
+  and you send it. It goes straight to Free School.<br><br>
+  Direct card and Pix donation, and the scholarship pages, are still being set up — for now this is how
+  we talk it through with you.</p>
+
+  <footer>
+    <a href="index.html">← Back to GazeWheel</a> · <a href="feedback.html">Suggestions</a> ·
+    <a href="https://www.freeschool.com.br" rel="noopener">Free School</a>
+  </footer>
+
+</div>
+<script>
+(function(){
+  var r = document.documentElement, b = document.getElementById("schemeBtn");
+  function cur(){ return r.getAttribute("data-scheme") ||
+    (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"); }
+  function paint(){ b.textContent = cur() === "light" ? "☾" : "☀"; }
+  paint();
+  b.addEventListener("click", function(){
+    var n = cur() === "light" ? "dark" : "light";
+    r.setAttribute("data-scheme", n);
+    try{ localStorage.setItem("gw.scheme", n); }catch(e){}
+    paint();
+  });
+})();
+
+var msgBox = document.getElementById("msg");
+function val(id){ return (document.getElementById(id).value || "").trim(); }
+
+/* monta a mensagem; devolve null e avisa se faltar o essencial */
+function build(){
+  var how = Array.prototype.slice.call(document.querySelectorAll("input[name=how]:checked"))
+              .map(function(c){ return c.value; });
+  var name = val("name"), email = val("email"), phone = val("phone");
+  if(!name || !email){
+    msgBox.textContent = "Please fill in your name and e-mail — otherwise we have no way to answer you.";
+    (name ? document.getElementById("email") : document.getElementById("name")).focus();
+    return null;
+  }
+  var L = [];
+  L.push("GazeWheel / Free School — I would like to support the project.");
+  L.push("");
+  L.push("How: " + (how.length ? how.join("; ") : "(not said)"));
+  var amount = val("amount");
+  if(amount) L.push("Amount in mind: " + amount);
+  L.push("Name: " + name);
+  L.push("E-mail: " + email);
+  if(phone) L.push("WhatsApp/phone: " + phone);
+  var note = val("note");
+  if(note){ L.push(""); L.push(note); }
+  return L.join("\n");
+}
+
+document.getElementById("sendMail").addEventListener("click", function(){
+  var m = build(); if(!m) return;
+  msgBox.textContent = "Opening your e-mail app… if nothing happens, use “Copy it instead” and send to contato@freeschool.com.br.";
+  window.location.href = "mailto:contato@freeschool.com.br?subject=" +
+    encodeURIComponent("GazeWheel — support") + "&body=" + encodeURIComponent(m);
+});
+
+document.getElementById("sendWa").addEventListener("click", function(){
+  var m = build(); if(!m) return;
+  msgBox.textContent = "Opening WhatsApp…";
+  window.open("https://wa.me/5521992793454?text=" + encodeURIComponent(m), "_blank", "noopener");
+});
+
+document.getElementById("copyIt").addEventListener("click", function(){
+  var m = build(); if(!m) return;
+  navigator.clipboard.writeText(m).then(function(){
+    msgBox.textContent = "Copied. Send it to contato@freeschool.com.br, or on WhatsApp to +55 21 99279-3454.";
+  }, function(){
+    msgBox.textContent = "Couldn't copy here. Send to contato@freeschool.com.br with the details above.";
+  });
+});
+</script>
+</body>
+</html>

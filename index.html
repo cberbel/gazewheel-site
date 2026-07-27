@@ -8,15 +8,15 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%2326324c' stroke-width='9'/%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%234da3ff' stroke-width='9' stroke-dasharray='66 223' stroke-dashoffset='-140' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='50' r='29' fill='none' stroke='%232c3a5c' stroke-width='8'/%3E%3Ccircle cx='50' cy='50' r='12' fill='%234da3ff'/%3E%3Cpath d='M56 48 v30 l8-7 4.8 10.6 6.2-2.8 -4.8-10.6 11-1 z' fill='%23fff' stroke='%230f1420' stroke-width='3'/%3E%3C/svg%3E">
 <style>
   :root{--bg:#0f1420;--panel:#1a2233;--panel2:#232e46;--text:#f2f6ff;--dim:#8fa0bf;--accent:#4da3ff;
-        --green:#59c96b;--amber:#ffd166;--line:#2a3550;--soft:#cddaf0;--onAccent:#0f1420;}
+        --green:#59c96b;--amber:#ffd166;--orange:#ff8a3d;--line:#2a3550;--soft:#cddaf0;--onAccent:#0f1420;}
   /* fundo claro: escolha da pessoa, ou o que o sistema dela já pede */
   .light-vars, :root[data-scheme="light"]{
         --bg:#e9f1fc;--panel:#ffffff;--panel2:#d7e6f9;--text:#111827;--dim:#4d5d7a;--accent:#0a63c9;
-        --green:#0f7a35;--amber:#8a5a00;--line:#c9dbf1;--soft:#2f3d59;--onAccent:#ffffff;}
+        --green:#0f7a35;--amber:#8a5a00;--orange:#c2500a;--line:#c9dbf1;--soft:#2f3d59;--onAccent:#ffffff;}
   @media (prefers-color-scheme: light){
     :root:not([data-scheme="dark"]){
         --bg:#e9f1fc;--panel:#ffffff;--panel2:#d7e6f9;--text:#111827;--dim:#4d5d7a;--accent:#0a63c9;
-        --green:#0f7a35;--amber:#8a5a00;--line:#c9dbf1;--soft:#2f3d59;--onAccent:#ffffff;}
+        --green:#0f7a35;--amber:#8a5a00;--orange:#c2500a;--line:#c9dbf1;--soft:#2f3d59;--onAccent:#ffffff;}
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   .scheme{position:fixed;top:14px;right:14px;z-index:20;background:var(--panel2);color:var(--text);
@@ -67,7 +67,7 @@
   .donate{background:linear-gradient(160deg,var(--panel),var(--panel2));border:2px solid var(--line);border-radius:18px;padding:30px 26px;text-align:center;}
   .donate h3{font-size:24px;}
   .donate p{color:var(--soft);max-width:640px;margin:0 auto 16px;}
-  .donate a.btn{background:var(--amber);color:var(--onAccent);}
+  .donate a.btn{background:var(--orange);color:var(--onAccent);}
   footer{border-top:1px solid var(--line);padding-top:22px;color:var(--dim);font-size:15px;text-align:center;}
   .fs-link{display:inline-flex;align-items:center;gap:12px;margin-top:18px;text-decoration:none;color:inherit;}
   .fs-stack{display:flex;flex-direction:column;align-items:center;gap:2px;}
@@ -219,8 +219,9 @@
   <section class="donate">
     <h3>Liked the idea?</h3>
     <p>GazeWheel is a Free School project. Donations fund early childhood education — scholarships —
-    and more projects like this one.</p>
-    <a class="btn" href="mailto:contato@freeschool.com.br?subject=Donation%20%2F%20Doa%C3%A7%C3%A3o%20%E2%80%94%20Free%20School">Talk to us about donating</a>
+    and more projects like this one. Tell us how and how much you would like to help, and we take it
+    from there.</p>
+    <a class="btn" href="support.html">I would like to support</a>
   </section>
 
   <footer>
