@@ -98,6 +98,16 @@
   .wedge:hover{fill:#3a5583;}
   .wedge.dwelling{fill:var(--accent);}
   .wedge.flash{fill:var(--accent);}
+  /* layout tradicional (QWERTY) — mesma engine, só a disposição muda */
+  .key{fill:var(--wedge); stroke:var(--bg); stroke-width:4; cursor:pointer;}
+  .key:hover{fill:#3a5583;}
+  .key.dwelling,.key.flash{fill:var(--accent);}
+  .key.fnkey{fill:var(--hub);}
+  .key.danger{fill:#4a2b38;}
+  .key.danger:hover{fill:#6d3a4c;}
+  body.light .key:hover{fill:#b2ccf0;}
+  body.light .key.danger{fill:#f7d3da;}
+  body.light .key.danger:hover{fill:#eeb0bd;}
   .quad{fill:var(--hub); stroke:var(--bg); stroke-width:5; cursor:pointer;}
   .quad:hover{fill:#3d5080;}
   .quad.dwelling,.quad.flash{fill:var(--accent);}
@@ -133,6 +143,14 @@
     font-size:calc(27px * var(--fs,1)); line-height:1.35; flex:1; overflow-y:auto; word-wrap:break-word;
   }
   #out .caret{display:inline-block; width:3px; height:1em; background:var(--accent); vertical-align:text-bottom; animation:blink 1.1s step-end infinite;}
+  /* modo "copie este trecho" — chega pela página Classics, em ?copy= */
+  #copyBar{display:none; background:var(--panel); border:2px solid var(--accent); border-radius:14px; padding:12px 14px;}
+  #copyBar.on{display:block;}
+  #copyTxt{font-size:calc(19px * var(--fs,1)); line-height:1.35; margin-bottom:7px;}
+  #copyTxt .done{color:var(--green); font-weight:700;}
+  #copyTxt .todo{color:var(--dim);}
+  #copyStat{font-size:15px; color:var(--accent); font-weight:700;}
+  #copyReset{height:42px; font-size:16px; width:100%; margin-top:9px; background:var(--panel2); border-radius:10px; font-weight:600;}
   #navRow{display:grid; grid-template-columns:66px 1fr 66px; gap:8px;}
   #btnFix.ativo{background:var(--accent); color:#0f1420;}
   /* modo corrigir: as palavras do texto viram alvos para reposicionar o cursor */
@@ -196,6 +214,11 @@
   </section>
 
   <aside id="side">
+    <div id="copyBar">
+      <div id="copyTxt"></div>
+      <div id="copyStat"></div>
+      <button class="ctrl tgt" id="copyReset"><span class="fill"></span>Start fresh</button>
+    </div>
     <div id="out" aria-live="polite"></div>
     <div id="navRow">
       <button class="ctrl tgt" id="btnPrev"><span class="fill"></span>◀</button>
@@ -304,6 +327,8 @@
     <button class="mini tgt" id="rateUp"><span class="fill"></span>+</button></div>
   <div class="row"><label>Voice</label>
     <button class="mini tgt" id="cfgVoice"><span class="fill"></span>—</button></div>
+  <div class="row"><label>Layout<br><span style="font-size:14.5px;color:var(--dim)">the round wheel, or a traditional keyboard</span></label>
+    <button class="mini tgt" id="cfgLayout"><span class="fill"></span>—</button></div>
   <div class="row"><label>Colors</label>
     <button class="mini tgt" id="cfgTheme"><span class="fill"></span>—</button></div>
   <div class="row"><label>Teach it your writing style<br><span style="font-size:14.5px;color:var(--dim)">paste your texts or load files — it learns your words</span></label>
@@ -556,12 +581,25 @@ function prune(){
    3. ESTADO E PREDIÇÃO
    ================================================================ */
 const DEF_CFG = {dwell:false, dwellMs:900, scale:0.92, fs:1, order:"alpha", innerN:0,
-                 outer:true, hc:false, light:false, rate:0.95, voice:"", autoSpeak:true, theme:"blue"};
+                 outer:true, hc:false, light:false, rate:0.95, voice:"", autoSpeak:true, theme:"blue",
+                 layout:"wheel"};
 const THEMES = ["blue","red","green","purple","amber"];
 let cfg = Object.assign({}, DEF_CFG, load(K.cfg, {}));
 let text = load(K.text, "") || "";
 let caret = text.length;      /* posição de escrita — dá para voltar e corrigir no meio */
 let page = 0, mode = "abc", paused = false, fixMode = false;
+
+/* roda ou grade tradicional — a URL manda (para a comparação), senão o ajuste salvo */
+let LAYOUT = (function(){
+  try{ const p = new URLSearchParams(location.search).get("layout");
+       if(p === "qwerty" || p === "wheel") return p; }catch(e){}
+  return cfg.layout || "wheel";
+})();
+
+/* modo "copie este trecho": a página Classics abre o teclado com ?copy=... */
+const TARGET = (function(){ try{ return new URLSearchParams(location.search).get("copy") || ""; }
+                            catch(e){ return ""; } })();
+let copyT0 = 0, copySel = 0, copyDone = false;
 const undoStack = [];
 
 function pushUndo(){ undoStack.push({t:text, c:caret}); if(undoStack.length > 60) undoStack.shift(); }
@@ -700,6 +738,7 @@ function fire(el){
   const now = performance.now();
   if(now < lockedUntil || paused) return;
   lockedUntil = now + COOLDOWN;
+  if(TARGET && !copyDone){ if(!copyT0) copyT0 = now; copySel++; }
   justFired = el;
   stopDwell();
   flash(el);
@@ -746,8 +785,64 @@ function ring(r0, r1, a0, a1){
 }
 function E(tag, at){ const e = document.createElementNS("http://www.w3.org/2000/svg", tag); for(const k in at) e.setAttribute(k, at[k]); return e; }
 
+/* ---- layout tradicional: as mesmas teclas, na grade de sempre ----
+   Existe para comparação: mesma predição, mesma voz, mesmo tudo — muda só
+   a distância que o cursor precisa percorrer. */
+const GRID_ABC = [
+  ["q","w","e","r","t","y","u","i","o","p"],
+  ["a","s","d","f","g","h","j","k","l"],
+  ["z","x","c","v","b","n","m",",","."]
+];
+const GRID_SYM = [
+  ["1","2","3","4","5","6","7","8","9","0"],
+  [".",",","?","!","-","'","\"",":",";"],
+  ["(",")","@","/","+","=","%","*","…"]
+];
+
+function drawGrid(){
+  const rows = (mode === "abc") ? GRID_ABC : GRID_SYM;
+  const GAP = 8, kw = (1000 - 40 - 9*GAP) / 10, kh = 118, rowGap = 10;
+  let y = (560 - (4*kh + 3*rowGap)) / 2;
+
+  const key = (x, w, ch, fn, cls, sub) => {
+    const r = E("rect", {x:x, y:y, width:w, height:kh, rx:14, class:"key" + (cls || "")});
+    bind(r, fn);
+    svg.appendChild(r);
+    if(sub){
+      const t1 = E("text", {x:x + w/2, y:y + kh/2 - 12, class:"lbl", "font-size":"34"}); t1.textContent = ch;
+      const t2 = E("text", {x:x + w/2, y:y + kh/2 + 20, class:"lbl sub", "font-size":"19"}); t2.textContent = sub;
+      svg.appendChild(t1); svg.appendChild(t2);
+    }else{
+      const t = E("text", {x:x + w/2, y:y + kh/2, class:"lbl", "font-size":"46"});
+      t.textContent = (mode === "abc") ? ch.toUpperCase() : ch;
+      svg.appendChild(t);
+    }
+  };
+
+  rows.forEach(r => {
+    let x = (1000 - (r.length*kw + (r.length-1)*GAP)) / 2;
+    r.forEach(ch => { key(x, kw, ch, () => typeChar(ch)); x += kw + GAP; });
+    y += kh + rowGap;
+  });
+
+  const FN = [
+    {ic:"", lb:"space", fn:doSpace, span:4},
+    {ic:"⌫", lb:"letter", fn:doBack, span:2, danger:1},
+    {ic:"⌫⌫", lb:"word", fn:doBackWord, span:2, danger:1},
+    {ic:"⤺", lb:"undo", fn:doUndo, span:1},
+    {ic:"🔊", lb:"speak", fn:doSpeak, span:1}
+  ];
+  let x = 20;
+  FN.forEach(q => {
+    const w = q.span*kw + (q.span - 1)*GAP;
+    key(x, w, q.ic || q.lb, q.fn, " fnkey" + (q.danger ? " danger" : ""), q.ic ? q.lb : "");
+    x += w + GAP;
+  });
+}
+
 function drawWheel(){
   svg.innerHTML = "";
+  if(LAYOUT === "qwerty"){ drawGrid(); return; }
   const ps = pages();
   if(page >= ps.length) page = 0;
   const letters = ps[page] || [];
@@ -1009,6 +1104,42 @@ function render(){
   for(const w of suggestions(3)) sugRow.appendChild(wordBtn(w, p));
 
   drawWheel();
+  renderCopy();
+}
+
+/* quanto do trecho já está escrito, do começo até onde bate */
+function matchLen(){
+  let i = 0;
+  while(i < text.length && i < TARGET.length && text[i] === TARGET[i]) i++;
+  return i;
+}
+function renderCopy(){
+  if(!TARGET) return;
+  const bar = document.getElementById("copyBar");
+  if(!bar) return;
+  bar.classList.add("on");
+
+  const n = matchLen();
+  const box = document.getElementById("copyTxt");
+  box.innerHTML = "";
+  const a = document.createElement("span"); a.className = "done"; a.textContent = TARGET.slice(0, n);
+  const b = document.createElement("span"); b.className = "todo"; b.textContent = TARGET.slice(n);
+  box.appendChild(a); box.appendChild(b);
+
+  const secs = copyT0 ? Math.round((performance.now() - copyT0)/1000) : 0;
+  const clock = Math.floor(secs/60) + ":" + String(secs%60).padStart(2,"0");
+  const stat = document.getElementById("copyStat");
+
+  if(n === TARGET.length && text.trim() === TARGET.trim()){
+    if(!copyDone){
+      copyDone = true;
+      say("finished — " + clock + ", " + copySel + " selections", 12000);
+    }
+    stat.textContent = "Finished ✓ " + clock + " · " + copySel + " selections for " + TARGET.length + " characters";
+  }else{
+    stat.textContent = n + " / " + TARGET.length + " characters" +
+      (copySel ? " · " + copySel + " selections · " + clock : "");
+  }
 }
 
 /* ================================================================
@@ -1018,6 +1149,15 @@ function fit(){
   document.documentElement.style.setProperty("--fs", cfg.fs);
   const h = window.innerHeight - 190;
   const w = window.innerWidth * 0.58;
+  if(LAYOUT === "qwerty"){
+    /* proporção de teclado, senão as teclas ficariam menores que os alvos da
+       roda e a comparação entre os dois seria injusta */
+    svg.setAttribute("viewBox", "0 0 1000 560");
+    const ww = Math.max(420, Math.round(Math.min(w, h/0.56) * cfg.scale));
+    svg.style.width = ww + "px"; svg.style.height = Math.round(ww * 0.56) + "px";
+    return;
+  }
+  svg.setAttribute("viewBox", "0 0 850 850");
   const base = Math.max(380, Math.min(h, w));
   const s = Math.max(340, Math.round(base * cfg.scale));
   svg.style.width = s + "px"; svg.style.height = s + "px";
@@ -1098,6 +1238,7 @@ function syncCfgUI(){
   set("cfgLight", cfg.light ? "on" : "off");
   document.body.classList.toggle("light", !!cfg.light);
   const lb = document.getElementById("cfgLight"); if(lb) lb.classList.toggle("on", !!cfg.light);
+  set("cfgLayout", LAYOUT === "qwerty" ? "traditional" : "round wheel");
   set("cfgTheme", cfg.theme || "blue");
   document.body.dataset.theme = cfg.theme || "blue";
   set("cfgAuto", cfg.autoSpeak ? "yes" : "no");
@@ -1155,6 +1296,7 @@ B("cfgOuter", () => setCfg({outer: !cfg.outer}));
 B("cfgHC",    () => setCfg({hc: !cfg.hc, light: false}));
 B("cfgLight", () => setCfg({light: !cfg.light, hc: false}));
 B("cfgTheme", () => setCfg({theme: THEMES[(THEMES.indexOf(cfg.theme || "blue") + 1) % THEMES.length]}));
+B("cfgLayout",() => { LAYOUT = (LAYOUT === "wheel") ? "qwerty" : "wheel"; setCfg({layout: LAYOUT}); });
 B("cfgAuto",  () => setCfg({autoSpeak: !cfg.autoSpeak}));
 B("rateDown", () => setCfg({rate: Math.max(0.5, +(cfg.rate - 0.05).toFixed(2))}));
 B("rateUp",   () => setCfg({rate: Math.min(1.6, +(cfg.rate + 0.05).toFixed(2))}));
@@ -1339,6 +1481,12 @@ function applyCommand(raw){
   if(did.length){ setCmdOut("✓ " + did.join(" · ")); say(did.join(" · ")); }
   else setCmdOut("I didn't get that — " + CMD_HINT);
 }
+
+B("copyReset", () => {
+  pushUndo(); text = ""; caret = 0; page = 0;
+  copyT0 = 0; copySel = 0; copyDone = false;
+  render(); say("cleared — the passage is waiting", 5000);
+});
 
 B("cmdGo", () => applyCommand(document.getElementById("cmdBox").value));
 B("cmdFromText", () => {
