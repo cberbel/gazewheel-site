@@ -11,12 +11,12 @@
         --green:#59c96b;--amber:#ffd166;--line:#2a3550;--soft:#cddaf0;--onAccent:#0f1420;}
   /* fundo claro: escolha da pessoa, ou o que o sistema dela já pede */
   .light-vars, :root[data-scheme="light"]{
-        --bg:#f7f9fd;--panel:#ffffff;--panel2:#e9f0f9;--text:#111827;--dim:#55637f;--accent:#0a63c9;
-        --green:#0f7a35;--amber:#8a5a00;--line:#dbe3ef;--soft:#33405c;--onAccent:#ffffff;}
+        --bg:#e9f1fc;--panel:#ffffff;--panel2:#d7e6f9;--text:#111827;--dim:#4d5d7a;--accent:#0a63c9;
+        --green:#0f7a35;--amber:#8a5a00;--line:#c9dbf1;--soft:#2f3d59;--onAccent:#ffffff;}
   @media (prefers-color-scheme: light){
     :root:not([data-scheme="dark"]){
-        --bg:#f7f9fd;--panel:#ffffff;--panel2:#e9f0f9;--text:#111827;--dim:#55637f;--accent:#0a63c9;
-        --green:#0f7a35;--amber:#8a5a00;--line:#dbe3ef;--soft:#33405c;--onAccent:#ffffff;}
+        --bg:#e9f1fc;--panel:#ffffff;--panel2:#d7e6f9;--text:#111827;--dim:#4d5d7a;--accent:#0a63c9;
+        --green:#0f7a35;--amber:#8a5a00;--line:#c9dbf1;--soft:#2f3d59;--onAccent:#ffffff;}
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   .scheme{position:fixed;top:14px;right:14px;z-index:20;background:var(--panel2);color:var(--text);
@@ -54,6 +54,7 @@
   .btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
   .btn{display:inline-block;padding:13px 22px;border-radius:12px;font-size:17px;font-weight:700;text-decoration:none;cursor:pointer;border:0;font-family:inherit;}
   .btn.wa{background:var(--green);color:var(--onAccent);}
+  .btn.pri{background:var(--accent);color:var(--onAccent);}
   .btn.cp{background:var(--panel2);color:var(--text);}
   .btn:hover{filter:brightness(1.1);}
   ul.feat{list-style:none;margin:0 0 13px;}
@@ -102,7 +103,7 @@
       <path d="M56 48 v30 l8 -7 4.8 10.6 6.2 -2.8 -4.8 -10.6 11 -1 z" fill="#fff" stroke="#0f1420" stroke-width="2.6" stroke-linejoin="round"/>
     </svg>
     <div class="brand"><span class="gaze">Gaze</span>Wheel</div>
-    <p class="slogan">Gazetyping is easier.</p>
+    <p class="slogan">Gazetyping made easier.</p>
     <h1>A round keyboard<br>for typing with the cursor</h1>
 
     <div class="cards">
@@ -156,6 +157,9 @@
     <p>The full alphabet stays on the outer ring, always in the same position. The inner ring shows only
     the letters likely to come next, large and near the center. The center is a rest zone — a dead area
     where the cursor can park without triggering anything.</p>
+    <p>None of this is settled. The shape is only the starting point — this keyboard stays open to
+    improvements and to entirely new ways of doing it, and the best ones have always come from the
+    people using it.</p>
   </section>
 
   <section>
@@ -201,12 +205,13 @@
     server.</p>
   </section>
 
+  <!-- suggestions -->
   <section class="share">
     <h3>Something got in the way? Tell us</h3>
     <p>A target that is hard to hit, a word that never comes up, a setting that should exist. Send it
     with a screenshot — every suggestion becomes a thread where we reply until it is solved.</p>
     <div class="btns">
-      <a class="btn wa" href="feedback.html">Send a suggestion</a>
+      <a class="btn pri" href="feedback.html">Send a suggestion</a>
     </div>
   </section>
 
