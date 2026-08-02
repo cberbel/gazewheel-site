@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GazeWheel — typing challenge</title>
+<meta name="description" content="Type a passage twice — once on the round keyboard, once on a traditional one — and measure the difference in time and selections. Shakespeare, Camões, Pessoa, Homer, Machado de Assis and Lima Barreto.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%2326324c' stroke-width='9'/%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%234da3ff' stroke-width='9' stroke-dasharray='66 223' stroke-dashoffset='-140' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='50' r='29' fill='none' stroke='%232c3a5c' stroke-width='8'/%3E%3Ccircle cx='50' cy='50' r='12' fill='%234da3ff'/%3E%3Cpath d='M56 48 v30 l8-7 4.8 10.6 6.2-2.8 -4.8-10.6 11-1 z' fill='%23fff' stroke='%230f1420' stroke-width='3'/%3E%3C/svg%3E">
+<style>
+  :root{--bg:#0f1420;--panel:#1a2233;--panel2:#232e46;--text:#f2f6ff;--dim:#8fa0bf;--accent:#4da3ff;
+        --green:#59c96b;--amber:#ffd166;--orange:#ff8a3d;--line:#2a3550;--soft:#cddaf0;--onAccent:#0f1420;}
+  /* fundo claro: escolha da pessoa, ou o que o sistema dela já pede */
+  :root[data-scheme="light"]{
+        --bg:#e9f1fc;--panel:#ffffff;--panel2:#d7e6f9;--text:#111827;--dim:#4d5d7a;--accent:#0a63c9;
+        --green:#0f7a35;--amber:#8a5a00;--orange:#c2500a;--line:#c9dbf1;--soft:#2f3d59;--onAccent:#ffffff;}
+  @media (prefers-color-scheme: light){
+    :root:not([data-scheme="dark"]){
+        --bg:#e9f1fc;--panel:#ffffff;--panel2:#d7e6f9;--text:#111827;--dim:#4d5d7a;--accent:#0a63c9;
+        --green:#0f7a35;--amber:#8a5a00;--orange:#c2500a;--line:#c9dbf1;--soft:#2f3d59;--onAccent:#ffffff;}
+  }
+  .scheme{position:fixed;top:14px;right:14px;z-index:20;background:var(--panel2);color:var(--text);
+    border:1px solid var(--line);border-radius:999px;width:46px;height:46px;font-size:20px;cursor:pointer;
+    font-family:inherit;line-height:1;}
+  .scheme:hover{filter:brightness(1.12);}
+  .topnav{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-bottom:28px;padding-right:56px;}
+  .topnav a{color:var(--dim);text-decoration:none;font-weight:600;font-size:16px;}
+  .topnav a:hover{color:var(--text);}
+  .topnav a.on{color:var(--accent);}
+  @media(max-width:600px){.topnav{gap:13px;padding-right:52px;} .topnav a{font-size:15px;}}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,Arial,sans-serif;line-height:1.55;}
+  .wrap{max-width:820px;margin:0 auto;padding:44px 22px 70px;}
+  h1{font-size:34px;letter-spacing:-.5px;margin-bottom:12px;line-height:1.2;}
+  .lede{font-size:19px;margin-bottom:14px;}
+  .lede.dim{color:var(--dim);}
+  .steps{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 24px;margin:20px 0 8px;}
+  .steps ol{margin:0 0 0 20px;}
+  .steps li{font-size:17px;margin-bottom:9px;color:var(--soft);}
+  .steps li b{color:var(--text);}
+  .lang{color:var(--amber);font-size:16.5px;font-style:italic;margin:18px 0 26px;}
+  h2{font-size:22px;margin:38px 0 4px;}
+  .sub{color:var(--dim);font-size:16px;margin-bottom:14px;}
+  p{font-size:17.5px;margin-bottom:13px;}
+  .draw{background:linear-gradient(160deg,var(--panel),var(--panel2));border:2px solid var(--accent);
+    border-radius:18px;padding:24px;text-align:center;margin-bottom:12px;}
+  .draw h3{font-size:22px;margin-bottom:6px;}
+  .draw p{color:var(--soft);font-size:16.5px;max-width:560px;margin:0 auto 14px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin-bottom:14px;}
+  .card.drawn{border:2px solid var(--accent);}
+  .quote{font-size:18.5px;line-height:1.5;margin-bottom:10px;}
+  .quote.b{margin-top:16px;}
+  .who{color:var(--dim);font-size:15px;margin-bottom:13px;}
+  .who b{color:var(--soft);font-weight:600;}
+  .tag{display:inline-block;font-size:12.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;
+    padding:3px 10px;border-radius:999px;background:var(--panel2);color:var(--accent);margin-bottom:9px;}
+  .pair{color:var(--accent);font-size:13.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:5px;}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .btn{display:inline-block;padding:12px 20px;border-radius:11px;font-size:16.5px;font-weight:700;
+    text-decoration:none;background:var(--panel2);color:var(--text);border:0;font-family:inherit;cursor:pointer;}
+  .btn.go{background:var(--accent);color:var(--onAccent);}
+  .btn:hover{filter:brightness(1.12);}
+  .note{background:var(--panel);border-left:4px solid var(--amber);border-radius:0 12px 12px 0;
+    padding:16px 20px;color:var(--soft);font-size:16px;margin-top:26px;}
+  footer{border-top:1px solid var(--line);margin-top:40px;padding-top:22px;color:var(--dim);font-size:15px;text-align:center;}
+  footer a{color:var(--accent);text-decoration:none;font-weight:700;}
+</style>
+<script>try{var s=localStorage.getItem("gw.scheme");if(s)document.documentElement.setAttribute("data-scheme",s);}catch(e){}</script>
+</head>
+<body>
+<button id="schemeBtn" class="scheme" title="Light / dark" aria-label="Switch between light and dark background">☀</button>
+<div class="wrap">
+
+  <nav class="topnav">
+    <a href="index.html">Keyboard</a>
+    <a class="on" href="challenge.html">Typing challenge</a>
+    <a href="feedback.html">Suggestions &amp; versions</a>
+    <a href="devices.html">Devices</a>
+    <a href="support.html">Support</a>
+  </nav>
+
+  <h1>Typing challenge</h1>
+  <p class="lede"><b>The point is to measure the difference.</b> Take one passage and write it twice
+  with the cursor — once on the round wheel, once on an ordinary keyboard laid out in rows. The
+  keyboard counts your characters, your selections and your time, so at the end you are not comparing
+  opinions. You are comparing two numbers.</p>
+  <p class="lede dim">Everything else is held still: same word prediction, same voice, same buttons.
+  The only thing that changes between the two runs is how far the cursor has to travel — which is the
+  entire claim this project makes.</p>
+  <p class="lede">And there is a second thing that happens, which matters more than the stopwatch:
+  <b>after a hundred characters on the traditional layout you stop needing the argument explained.</b>
+  You feel it. That crawl across the screen for one letter, then back again for the next, is what
+  writing a sentence costs someone who types with their eyes — every sentence, all day.</p>
+
+  <div class="steps">
+    <ol>
+      <li><b>Pick a passage</b> — or let it draw one for you.</li>
+      <li><b>Write it on the traditional keyboard first.</b> Note the time and the number of selections.</li>
+      <li><b>Write it again on the round wheel</b> and compare.</li>
+      <li>Start with a short one. A thousand characters with a cursor is a long afternoon.</li>
+    </ol>
+  </div>
+  <p class="lang">Tem trechos nos dois idiomas. Em verso, o mesmo texto nos dois teclados; em prosa,
+  dois textos de tamanho quase igual — para o segundo turno não virar teste de memória.</p>
+
+  <div class="draw">
+    <h3>Let it pick one</h3>
+    <p>Not knowing what comes is half of it.</p>
+    <div class="row" style="justify-content:center">
+      <button class="btn go" id="drawEn">Draw in English</button>
+      <button class="btn go" id="drawPt">Sortear em português</button>
+    </div>
+  </div>
+  <div id="drawn"></div>
+
+  <h2>Short — a minute or two</h2>
+  <p class="sub">Where to start. Enough to feel the difference, not enough to hurt.</p>
+  <div id="short"></div>
+
+  <h2>Medium — a sonnet, a poem entire</h2>
+  <p class="sub">Around five hundred characters: long enough that the layout starts to decide things.</p>
+  <div id="medium"></div>
+
+  <h2>Long — the real thing</h2>
+  <p class="sub">Eight hundred characters and up. This is where the two keyboards stop being comparable
+  by feel and the numbers do the talking.</p>
+  <div id="long"></div>
+
+  <h2>Prose, in pairs</h2>
+  <p class="sub">Two passages of nearly identical length, one for each keyboard.</p>
+  <div id="pairs"></div>
+
+  <p class="note"><b>Sources and copyright.</b> Everything here is in the public domain, taken from
+  Wikisource and quoted word for word: Shakespeare from the Yale editions of 1919 and 1923, Camões in
+  modernised spelling, Homer in Samuel Butler's 1900 translation, Machado de Assis and Lima Barreto
+  from the Brazilian originals. Line breaks are flattened into a single line, because the keyboard
+  types one.<br><br>
+  Some names are missing for the same reason: Manuel Bandeira died in 1968, so his poems are under
+  copyright in Brazil until 2039 and are not ours to hand out.<br><br>
+  <b>The competition is the plan.</b> Customise your keyboard, draw a passage, run it on both — the
+  best runs win books. It starts when there are enough of us;
+  <a href="feedback.html">say if you want in</a>.</p>
+
+  <footer>
+    <a href="index.html">← Back to GazeWheel</a> · <a href="feedback.html">Suggestions</a> ·
+    <a href="support.html">Support</a>
+  </footer>
+
+</div>
+<script>
+(function(){
+  var r = document.documentElement, b = document.getElementById("schemeBtn");
+  function cur(){ return r.getAttribute("data-scheme") ||
+    (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"); }
+  function paint(){ b.textContent = cur() === "light" ? "☾" : "☀"; }
+  paint();
+  b.addEventListener("click", function(){
+    var n = cur() === "light" ? "dark" : "light";
+    r.setAttribute("data-scheme", n);
+    try{ localStorage.setItem("gw.scheme", n); }catch(e){}
+    paint();
+  });
+})();
+
+/* Tudo domínio público, copiado da Wikisource palavra por palavra.
+   Quebras de linha viram espaço: o teclado escreve em uma linha só. */
+var SHORT = [
+  {lang:"en", t:"To be, or not to be: that is the question.", a:"William Shakespeare", w:"Hamlet, 1603"},
+  {lang:"en", t:"All the world's a stage, and all the men and women merely players.", a:"William Shakespeare", w:"As You Like It"},
+  {lang:"en", t:"What's in a name? That which we call a rose by any other name would smell as sweet.", a:"William Shakespeare", w:"Romeo and Juliet"},
+  {lang:"en", t:"We are such stuff as dreams are made on, and our little life is rounded with a sleep.", a:"William Shakespeare", w:"The Tempest"},
+  {lang:"pt", t:"Navegar é preciso; viver não é preciso.", a:"Fernando Pessoa", w:"Navegar é Preciso, 1932"},
+  {lang:"pt", t:"Amor é fogo que arde sem se ver; é ferida que dói e não se sente.", a:"Luís de Camões", w:"Soneto"},
+  {lang:"pt", t:"Minha terra tem palmeiras, onde canta o sabiá.", a:"Gonçalves Dias", w:"Canção do Exílio, 1843"},
+  {lang:"pt", t:"Estamos em pleno mar. Doudo no espaço brinca o luar, dourada borboleta.", a:"Castro Alves", w:"O Navio Negreiro, 1869"}
+];
+
+var MEDIUM = [
+  {lang:"pt",
+   t:"O poeta é um fingidor. Finge tão completamente Que chega a fingir que é dor A dor que deveras sente. E os que lêem o que escreve, Na dor lida sentem bem, Não as duas que ele teve, Mas só a que eles não têm. E assim nas calhas de roda Gira, a entreter a razão, Esse comboio de corda Que se chama coração.",
+   a:"Fernando Pessoa", w:"Autopsicografia"},
+  {lang:"en",
+   t:"Shall I compare thee to a summer's day? Thou art more lovely and more temperate: Rough winds do shake the darling buds of May, And summer's lease hath all too short a date: Sometime too hot the eye of heaven shines, And often is his gold complexion dimm'd; And every fair from fair sometime declines, By chance, or nature's changing course untrimm'd; But thy eternal summer shall not fade, Nor lose possession of that fair thou ow'st, Nor shall death brag thou wander'st in his shade, When in eternal lines to time thou grow'st; So long as man can breathe, or eyes can see, So long lives this, and this gives life to thee.",
+   a:"William Shakespeare", w:"Sonnet 18"},
+  {lang:"en",
+   t:"Let me not to the marriage of true minds Admit impediments. Love is not love Which alters when it alteration finds, Or bends with the remover to remove: O, no! it is an ever-fixed mark, That looks on tempests and is never shaken; It is the star to every wandering bark, Whose worth's unknown, although his height be taken. Love's not Time's fool, though rosy lips and cheeks Within his bending sickle's compass come; Love alters not with his brief hours and weeks, But bears it out even to the edge of doom. If this be error, and upon me prov'd, I never writ, nor no man ever lov'd.",
+   a:"William Shakespeare", w:"Sonnet 116"},
+  {lang:"pt",
+   t:"As armas e os barões assinalados, Que da ocidental praia Lusitana, Por mares nunca de antes navegados, Passaram ainda além da Taprobana, Em perigos e guerras esforçados, Mais do que prometia a força humana, E entre gente remota edificaram Novo Reino, que tanto sublimaram; E também as memórias gloriosas Daqueles Reis, que foram dilatando A Fé, o Império, e as terras viciosas De África e de Ásia andaram devastando; E aqueles, que por obras valerosas Se vão da lei da morte libertando; Cantando espalharei por toda parte, Se a tanto me ajudar o engenho e arte.",
+   a:"Luís de Camões", w:"Os Lusíadas, Canto I, estrofes 1–2"}
+];
+
+var LONG = [
+  {lang:"en",
+   t:"All the world's a stage, And all the men and women merely players: They have their exits and their entrances; And one man in his time plays many parts, His acts being seven ages. At first the infant, Mewling and puking in the nurse's arms. And then the whining school-boy, with his satchel, And shining morning face, creeping like snail Unwillingly to school. And then the lover, Sighing like furnace, with a woful ballad Made to his mistress' eyebrow. Then a soldier, Full of strange oaths, and bearded like the pard, Jealous in honour, sudden and quick in quarrel, Seeking the bubble reputation Even in the cannon's mouth. And then the justice, In fair round belly with good capon lin'd, With eyes severe, and beard of formal cut, Full of wise saws and modern instances; And so he plays his part.",
+   a:"William Shakespeare", w:"As You Like It, the seven ages of man"},
+  {lang:"pt",
+   t:"As armas e os barões assinalados, Que da ocidental praia Lusitana, Por mares nunca de antes navegados, Passaram ainda além da Taprobana, Em perigos e guerras esforçados, Mais do que prometia a força humana, E entre gente remota edificaram Novo Reino, que tanto sublimaram; E também as memórias gloriosas Daqueles Reis, que foram dilatando A Fé, o Império, e as terras viciosas De África e de Ásia andaram devastando; E aqueles, que por obras valerosas Se vão da lei da morte libertando; Cantando espalharei por toda parte, Se a tanto me ajudar o engenho e arte. Cessem do sábio Grego e do Troiano As navegações grandes que fizeram; Cale-se de Alexandro e de Trajano A fama das vitórias que tiveram; Que eu canto o peito ilustre Lusitano, A quem Neptuno e Marte obedeceram: Cesse tudo o que a Musa antiga canta, Que outro valor mais alto se alevanta. E vós, Tágides minhas, pois criado Tendes em mim um novo engenho ardente, Se sempre em verso humilde celebrado Foi de mim vosso rio alegremente, Dai-me agora um som alto e sublimado, Um estilo grandíloquo e corrente, Porque de vossas águas, Febo ordene Que não tenham inveja às de Hipocrene.",
+   a:"Luís de Camões", w:"Os Lusíadas, Canto I, estrofes 1–4"}
+];
+
+var PAIRS = [
+  {lang:"en",
+   a:"Sing, O goddess, the anger of Achilles son of Peleus, that brought countless ills upon the Achaeans.",
+   b:"Tell me, O Muse, of that ingenious hero who travelled far and wide after he had sacked Troy.",
+   aa:"Homer", wa:"Iliad, opening — trans. Samuel Butler, 1900",
+   ab:"Homer", wb:"Odyssey, opening — trans. Samuel Butler, 1900"},
+  {lang:"pt",
+   a:"Não tive filhos, não transmiti a nenhuma criatura o legado da nossa miséria.",
+   b:"Quaresma era um homem pequeno, magro, que usava pince-nez, olhava sempre baixo.",
+   aa:"Machado de Assis", wa:"Memórias Póstumas de Brás Cubas, 1881",
+   ab:"Lima Barreto", wb:"Triste Fim de Policarpo Quaresma, 1915"}
+];
+
+var L = {
+  en:{wheel:"Round wheel →", qwerty:"Traditional keyboard →", start:"Start →", page:"en.html", chars:"characters"},
+  pt:{wheel:"Na roda →", qwerty:"No teclado tradicional →", start:"Começar →", page:"pt.html", chars:"caracteres"}
+};
+
+function link(page, txt, layout){ return page + "?layout=" + layout + "&copy=" + encodeURIComponent(txt); }
+
+/* verso: o mesmo texto nos dois teclados */
+function cardSame(p){
+  var t = L[p.lang], d = document.createElement("div");
+  d.className = "card";
+  d.innerHTML =
+    '<span class="tag">' + p.t.length + " " + t.chars + '</span>' +
+    '<p class="quote">“' + p.t + '”</p>' +
+    '<p class="who"><b>' + p.a + '</b> · ' + p.w + '</p>' +
+    '<div class="row">' +
+      '<a class="btn" href="' + link(t.page, p.t, "qwerty") + '">' + t.qwerty + '</a>' +
+      '<a class="btn go" href="' + link(t.page, p.t, "wheel") + '">' + t.wheel + '</a>' +
+    '</div>';
+  return d;
+}
+
+/* prosa: dois textos parecidos, um por teclado */
+function cardPair(p){
+  var t = L[p.lang], d = document.createElement("div");
+  d.className = "card";
+  d.innerHTML =
+    '<p class="pair">' + t.qwerty + '</p>' +
+    '<p class="quote">“' + p.b + '”</p>' +
+    '<p class="who"><b>' + p.ab + '</b> · ' + p.wb + ' · ' + p.b.length + ' ' + t.chars + '</p>' +
+    '<div class="row"><a class="btn" href="' + link(t.page, p.b, "qwerty") + '">' + t.start + '</a></div>' +
+    '<p class="pair" style="margin-top:22px">' + t.wheel + '</p>' +
+    '<p class="quote b">“' + p.a + '”</p>' +
+    '<p class="who"><b>' + p.aa + '</b> · ' + p.wa + ' · ' + p.a.length + ' ' + t.chars + '</p>' +
+    '<div class="row"><a class="btn go" href="' + link(t.page, p.a, "wheel") + '">' + t.start + '</a></div>';
+  return d;
+}
+
+function fill(list, into){
+  var box = document.getElementById(into);
+  list.forEach(function(p){ box.appendChild(p.a && p.b ? cardPair(p) : cardSame(p)); });
+}
+fill(SHORT, "short");
+fill(MEDIUM, "medium");
+fill(LONG, "long");
+fill(PAIRS, "pairs");
+
+/* sorteio */
+function draw(lang){
+  var pool = SHORT.concat(MEDIUM, LONG, PAIRS).filter(function(p){ return p.lang === lang; });
+  var p = pool[Math.floor(Math.random() * pool.length)];
+  var box = document.getElementById("drawn");
+  box.innerHTML = "";
+  var card = (p.a && p.b) ? cardPair(p) : cardSame(p);
+  card.className = "card drawn";
+  box.appendChild(card);
+  box.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+document.getElementById("drawEn").addEventListener("click", function(){ draw("en"); });
+document.getElementById("drawPt").addEventListener("click", function(){ draw("pt"); });
+</script>
+</body>
+</html>
