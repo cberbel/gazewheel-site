@@ -810,8 +810,9 @@ function drawGrid(){
   const GAP = 8, kw = (1000 - 40 - 9*GAP) / 10, kh = 118, rowGap = 10;
   let y = (560 - (4*kh + 3*rowGap)) / 2;
 
-  const key = (x, w, ch, fn, cls, sub) => {
+  const key = (x, w, ch, fn, cls, sub, gw) => {
     const r = E("rect", {x:x, y:y, width:w, height:kh, rx:14, class:"key" + (cls || "")});
+    if(gw) r.setAttribute("data-gw", gw);
     bind(r, fn);
     svg.appendChild(r);
     if(sub){
@@ -827,12 +828,12 @@ function drawGrid(){
 
   rows.forEach(r => {
     let x = (1000 - (r.length*kw + (r.length-1)*GAP)) / 2;
-    r.forEach(ch => { key(x, kw, ch, () => typeChar(ch)); x += kw + GAP; });
+    r.forEach(ch => { key(x, kw, ch, () => typeChar(ch), "", "", ch); x += kw + GAP; });
     y += kh + rowGap;
   });
 
   const FN = [
-    {ic:"", lb:"space", fn:doSpace, span:4},
+    {ic:"", lb:"space", fn:doSpace, span:4, gw:" "},
     {ic:"⌫", lb:"letter", fn:doBack, span:2, danger:1},
     {ic:"⌫⌫", lb:"word", fn:doBackWord, span:2, danger:1},
     {ic:"⤺", lb:"undo", fn:doUndo, span:1},
@@ -841,7 +842,7 @@ function drawGrid(){
   let x = 20;
   FN.forEach(q => {
     const w = q.span*kw + (q.span - 1)*GAP;
-    key(x, w, q.ic || q.lb, q.fn, " fnkey" + (q.danger ? " danger" : ""), q.ic ? q.lb : "");
+    key(x, w, q.ic || q.lb, q.fn, " fnkey" + (q.danger ? " danger" : ""), q.ic ? q.lb : "", q.gw);
     x += w + GAP;
   });
 }
@@ -860,7 +861,7 @@ function drawWheel(){
     const step = 360 / chars.length;
     chars.forEach((ch,i) => {
       const a0 = i*step - step/2;
-      const p = E("path", {d: ring(O0, O1, a0, a0+step), class:"wedge"});
+      const p = E("path", {d: ring(O0, O1, a0, a0+step), class:"wedge", "data-gw": ch});
       bind(p, () => typeChar(ch));
       g.appendChild(p);
       const [tx,ty] = polar((O0+O1)/2, a0 + step/2);
@@ -876,7 +877,7 @@ function drawWheel(){
   const step = 360 / n;
   letters.forEach((ch,i) => {
     const a0 = i*step - step/2;
-    const p = E("path", {d: ring(I0, I1, a0, a0+step), class:"wedge"});
+    const p = E("path", {d: ring(I0, I1, a0, a0+step), class:"wedge", "data-gw": ch});
     bind(p, () => typeChar(ch));
     svg.appendChild(p);
     const [tx,ty] = polar((I0+I1)/2, a0 + step/2);
@@ -887,7 +888,7 @@ function drawWheel(){
 
   /* anel de funções — 6 setores, os dois de apagar longe do espaço */
   const FN = [
-    {ic:"",   lb:"space",  fn:doSpace},
+    {ic:"",   lb:"space",  fn:doSpace, gw:" "},
     {ic:"🔊", lb:"speak",  fn:doSpeak},
     {ic:"↻",  lb:"more",   fn:doSwap},
     {ic:"⌫",  lb:"letter", fn:doBack,     danger:1},
@@ -897,6 +898,7 @@ function drawWheel(){
   FN.forEach((q,i) => {
     const a0 = i*60 - 30;
     const p = E("path", {d: ring(H0, H1, a0, a0+60), class:"quad" + (q.danger ? " danger" : "")});
+    if(q.gw) p.setAttribute("data-gw", q.gw);
     bind(p, q.fn);
     svg.appendChild(p);
     const [ix,iy] = polar((H0+H1)/2, a0 + 30);
@@ -1047,6 +1049,8 @@ if("speechSynthesis" in window){
 function wordBtn(w, p){
   const b = document.createElement("button");
   b.className = "word tgt";
+  /* contrato da arena: completa a palavra e para aí — sem espaço extra */
+  b.setAttribute("data-gw-palavra", w);
   b.innerHTML = '<span class="fill"></span><b>' + w.slice(0, p.length) + '</b>' + w.slice(p.length);
   bind(b, () => acceptWord(w));
   return b;
@@ -1113,10 +1117,16 @@ function render(){
   renderCopy();
 }
 
+/* A roda escreve em minúsculas e sem acento (o acento vem pela previsão),
+   então a conferência ignora caixa e acento — senão nenhum trecho fecharia.
+   Normaliza caractere a caractere para não perder o alinhamento das posições. */
+function nc(c){ const d = c.normalize("NFD"); return d[0].toLowerCase(); }
+function sameCh(a, b){ return nc(a) === nc(b); }
+
 /* quanto do trecho já está escrito, do começo até onde bate */
 function matchLen(){
   let i = 0;
-  while(i < text.length && i < TARGET.length && text[i] === TARGET[i]) i++;
+  while(i < text.length && i < TARGET.length && sameCh(text[i], TARGET[i])) i++;
   return i;
 }
 function renderCopy(){
@@ -1136,7 +1146,7 @@ function renderCopy(){
   const clock = Math.floor(secs/60) + ":" + String(secs%60).padStart(2,"0");
   const stat = document.getElementById("copyStat");
 
-  if(n === TARGET.length && text.trim() === TARGET.trim()){
+  if(n === TARGET.length && text.trim().length === TARGET.trim().length){
     if(!copyDone){
       copyDone = true;
       say("finished — " + clock + ", " + copySel + " selections", 12000);
@@ -1510,7 +1520,15 @@ B("cmdFromText", () => {
 })();
 
 /* ================================================================
-   12. INÍCIO
+   12. CONTRATO DA ARENA
+   O juiz da arena precisa de duas coisas: saber onde ficam os alvos
+   (data-gw="a" nas teclas, data-gw-palavra="casa" nas sugestões, marcados
+   no desenho) e conseguir ler o que já foi escrito.
+   ================================================================ */
+window.gwTexto = function(){ return text; };
+
+/* ================================================================
+   13. INÍCIO
    ================================================================ */
 syncCfgUI();
 fit();
